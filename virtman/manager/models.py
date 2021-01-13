@@ -1,6 +1,9 @@
 from django.db import models
 
-class Storage(models.model):
+# Create your models here.
+class Storage(models.Model):
+    def _str_(self):
+        return self.path
     path = models.CharField(max_length=30)
     device_type = models.CharField(max_length=30) 
     bus = models.CharField(max_length=30)
@@ -9,6 +12,8 @@ class Storage(models.model):
 
 
 class VM(models.Model):
+    def _str_(self):
+        return self.name
     name = models.CharField(max_length=30)
     vm_id = models.IntegerField()
     cpus = models.IntegerField()
