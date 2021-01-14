@@ -1,9 +1,9 @@
-{% if latest_question_list %}
+{% if VM_list %}
     <ul>
-    {% for vm in latest_question_list %}
-        <li><a href="/manager/{{ vm.id }}/edit">{{ vm.name }}</a></li>
+    {% for vm in VM_list %}
+        <p>Name: {{vm.name}} CPUs: {{vm.cpus}} RAM: {{vm.ram}} Hypervisor: {{vm.hypervisor}} OS: {{vm.os}} xml: {{vm.xml}} <a href="/manager/{{ vm.id }}/edit">Edit</a></p>
     {% endfor %}
     </ul>
 {% else %}
-    <p>No polls are available.</p>
+    <p>No VMs are available.</p>
 {% endif %}

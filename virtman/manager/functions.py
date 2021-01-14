@@ -14,15 +14,9 @@ def connectToVM(conn, vm_name):
         VM = conn.lookupByName(vm_name)
     except libvirt.libvirtError:
         print('Failed to find the main domain')
-        
     return VM
 
 
 
-
-
-
-vm_name = input("Enter VM Name: ")
-
 conn = connectToHypervisor()
-VM = connectToVM(conn, vm_name)
+#VM = connectToVM(conn, vm_name)
