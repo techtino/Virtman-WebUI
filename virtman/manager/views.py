@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.base import TemplateView
-from . import functions
+from . import LibvirtManagement
 
 class HomePageView(TemplateView):
     template_name = "index.html"
