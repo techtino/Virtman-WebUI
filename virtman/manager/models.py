@@ -10,7 +10,6 @@ class Storage(models.Model):
     size = models.IntegerField()
     pass
 
-
 class VM(models.Model):
     def _str_(self):
         return self.name

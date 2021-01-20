@@ -8,6 +8,11 @@ from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.base import TemplateView
 from . import LibvirtManagement
+from .forms import VMForm
+from django.http import HttpResponseRedirect
+from django.forms import modelformset_factory
+from .forms import VMForm
+
 
 class HomePageView(TemplateView):
     template_name = "index.html"
@@ -20,6 +25,18 @@ def listing(request):
         'VM_list': VM_list,
     }
     return HttpResponse(template.render(context, request))
+
+@login_required
+def add(request):
+    if request.method == "POST":
+        form = VMForm(request.POST)
+        if form.is_valid():
+           form.save()
+           return render(request, 'listing.html')
+    else:
+        form = VMForm()
+        return render(request, 'add.html', {'form': form})
+
 @login_required
 def edit(request, vm_id):
     if not request.user.is_authenticated:
