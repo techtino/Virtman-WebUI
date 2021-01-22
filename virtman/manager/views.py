@@ -26,6 +26,7 @@ def home(request):
 
 @login_required
 def listing(request):
+    # pylint: disable=no-member
     VM_list = VM.objects.order_by('id')[:40]
     template = loader.get_template('listing.html')
     username = request.user.get_username()
@@ -61,6 +62,7 @@ def logout_view(request):
 @login_required
 def startVM_View(request,id):
     get_object_or_404(VM, id=id)
+    # pylint: disable=no-member
     machine = VM.objects.get(id=id)
     name = machine.name
     cpus = machine.cpus
