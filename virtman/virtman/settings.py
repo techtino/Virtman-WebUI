@@ -27,7 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_REDIRECT_URL = "/manager/listing"
+LOGIN_REDIRECT_URL = "/manager/home"
+LOGOUT_REDIRECT_URL = "/manager/home"
 
 # Application definition
 

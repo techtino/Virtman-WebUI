@@ -1,5 +1,5 @@
 <h1>Add new VM</h1>
-<form action="{% url 'listing' %}"
+<form action="add"
       method="post">
       {% csrf_token %}
       {{ form.as_p }}

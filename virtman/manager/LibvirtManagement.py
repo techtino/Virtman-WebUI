@@ -1,5 +1,6 @@
 import libvirt
 import sys
+from .models import VM
 
 def createQemuVM():
     KB = 1024 * 1024

@@ -3,26 +3,35 @@ from .models import VM
 from django.template import loader
 from django.http import HttpResponse, Http404
 from django.conf import settings
-from django.shortcuts import redirect
-from django.contrib.auth import logout as django_logout
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.base import TemplateView
 from . import LibvirtManagement
 from .forms import VMForm
 from django.http import HttpResponseRedirect
 from django.forms import modelformset_factory
-from .forms import VMForm
-
 
 class HomePageView(TemplateView):
     template_name = "index.html"
 
+def home(request):
+    template = loader.get_template('index.html')
+    username = request.user.get_username()
+
+    context = {
+        'username': username,
+    }
+    return HttpResponse(template.render(context, request))
+
 @login_required
 def listing(request):
-    VM_list = VM.objects.order_by('vm_id')[:5]
+    VM_list = VM.objects.order_by('id')[:40]
     template = loader.get_template('listing.html')
+    username = request.user.get_username()
     context = {
         'VM_list': VM_list,
+        'username': username,
     }
     return HttpResponse(template.render(context, request))
 
@@ -32,21 +41,31 @@ def add(request):
         form = VMForm(request.POST)
         if form.is_valid():
            form.save()
-           return render(request, 'listing.html')
+           return redirect('/manager/listing')
     else:
         form = VMForm()
         return render(request, 'add.html', {'form': form})
 
 @login_required
-def edit(request, vm_id):
-    if not request.user.is_authenticated:
-        return redirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
-    num_of_vms = VM.objects.order_by('vm_id')[:5].count()
-    if vm_id <= num_of_vms:
-        return HttpResponse("VM Exists")
-    else:
-        raise Http404("VM does not exist!")
+def edit(request,id):
+    instance = get_object_or_404(VM, id=id)
+    form = VMForm(request.POST or None, instance=instance)
+    if form.is_valid():
+        form.save()
+        return redirect('/manager/listing')
+    return render(request, 'edit.html', {'form': form})
 
-def logout(request):
-    django_logout(request)
-    return redirect('/')
+def logout_view(request):
+    logout(request)
+
+@login_required
+def startVM_View(request,id):
+    get_object_or_404(VM, id=id)
+    machine = VM.objects.get(id=id)
+    name = machine.name
+    cpus = machine.cpus
+    RAM = machine.ram
+
+    
+    return HttpResponse("epic")
+    #LibvirtManagement.createQemuVM()

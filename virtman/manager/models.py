@@ -14,7 +14,6 @@ class VM(models.Model):
     def _str_(self):
         return self.name
     name = models.CharField(max_length=30)
-    vm_id = models.IntegerField()
     cpus = models.IntegerField()
     ram = models.IntegerField()
     hypervisor = models.CharField(max_length=30)
