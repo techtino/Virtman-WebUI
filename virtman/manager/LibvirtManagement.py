@@ -2,14 +2,15 @@ import libvirt
 import sys
 from .models import VM
 
-def createQemuVM():
+def createQemuVM(name, cpus, ram):
     KB = 1024 * 1024
     MB = 1024 * KB
     params = {}
-    params['ram'] = 1
-    params['vcpu'] = 1
-    params['name'] = "windows"
+    params['ram'] = ram
+    params['vcpu'] = cpus
+    params['name'] = name
     conn = libvirt.open("qemu:///system")
+    print("hi")
 
     xml = """<domain type='kvm'>
         <name>{}</name>
@@ -43,5 +44,11 @@ def createQemuVM():
         </devices>
         </domain>""".format(params['name'], int(params['ram']) * KB, params['vcpu'])
     conn.createXML(xml)
+    conn.close()
 
-#createQemuVM()
+def shutdownVM(name):
+    conn = libvirt.open('qemu:///system')
+    print(name)
+    machine = conn.lookupByName(name)
+    machine.destroy()
+    conn.close()

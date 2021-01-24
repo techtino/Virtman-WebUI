@@ -56,6 +56,13 @@ def edit(request,id):
         return redirect('/manager/listing')
     return render(request, 'edit.html', {'form': form})
 
+@login_required
+def delete(request,id):
+    instance = get_object_or_404(VM, id=id)
+    instance.delete()
+    return redirect('/manager/listing')
+
+@login_required
 def logout_view(request):
     logout(request)
 
@@ -67,7 +74,17 @@ def startVM_View(request,id):
     name = machine.name
     cpus = machine.cpus
     RAM = machine.ram
-
     
-    return HttpResponse("epic")
-    #LibvirtManagement.createQemuVM()
+    LibvirtManagement.createQemuVM(name, cpus, RAM)
+    return redirect('/manager/listing')
+
+
+@login_required
+def stopVM_View(request,id):
+    get_object_or_404(VM, id=id)
+    # pylint: disable=no-member
+    machine = VM.objects.get(id=id)
+    name = machine.name
+    
+    LibvirtManagement.shutdownVM(name)
+    return redirect('/manager/listing')

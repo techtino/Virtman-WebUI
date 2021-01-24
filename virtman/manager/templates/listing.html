@@ -2,7 +2,7 @@ Username: {{username}} <a href="/manager/home">Home</a> <a href="/manager/add">A
 {% if VM_list %}
     <ul>
     {% for vm in VM_list %}
-        <p>Name: {{vm.name}} CPUs: {{vm.cpus}} RAM: {{vm.ram}} Hypervisor: {{vm.hypervisor}} OS: {{vm.os}} xml: {{vm.xml}} <a href="/manager/{{ vm.id }}/edit">Edit</a></p>
+        <p>Name: {{vm.name}} CPUs: {{vm.cpus}} RAM: {{vm.ram}} Hypervisor: {{vm.hypervisor}} OS: {{vm.os}} xml: {{vm.xml}} <a href="/manager/{{ vm.id }}/edit">Edit</a>  <a href="/manager/{{ vm.id }}/delete">Delete</a>  <a href="/manager/{{ vm.id }}/startVM">Start</a> <a href="/manager/{{ vm.id }}/stopVM">Stop</a></p>
     {% endfor %}
     </ul>
 {% else %}
