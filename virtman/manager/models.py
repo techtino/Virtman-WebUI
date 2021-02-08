@@ -4,7 +4,6 @@ from django.db import models
 class Storage(models.Model):
     def _str_(self):
         return self.path
-    path = models.CharField(max_length=30)
     device_type = models.CharField(max_length=30) 
     bus = models.CharField(max_length=30)
     size = models.IntegerField()

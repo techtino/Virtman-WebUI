@@ -1,9 +1,8 @@
-from django.shortcuts import render
 from .models import VM
 from django.template import loader
 from django.http import HttpResponse, Http404
 from django.conf import settings
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.base import TemplateView

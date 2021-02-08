@@ -10,8 +10,6 @@ def createQemuVM(name, cpus, ram):
     params['vcpu'] = cpus
     params['name'] = name
     conn = libvirt.open("qemu:///system")
-    print("hi")
-
     xml = """<domain type='kvm'>
         <name>{}</name>
         <memory unit='KiB'>{}</memory>
@@ -46,9 +44,22 @@ def createQemuVM(name, cpus, ram):
     conn.createXML(xml)
     conn.close()
 
+def CreateStoragePool():
+    conn = libvirt.open('qemu:///system')
+
+    xml = """<pool type="dir">
+	<name>vdisk</name>
+	<target>
+          <path>/var/lib/libvirt/images</path>
+	</target>
+    </pool>"""
+
+    storagePool = conn.storagePoolDefineXML(xml, 0)
+
+
+
 def shutdownVM(name):
     conn = libvirt.open('qemu:///system')
-    print(name)
     machine = conn.lookupByName(name)
     machine.destroy()
     conn.close()
