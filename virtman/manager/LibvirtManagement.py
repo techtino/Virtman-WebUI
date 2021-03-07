@@ -56,8 +56,6 @@ def CreateStoragePool():
 
     storagePool = conn.storagePoolDefineXML(xml, 0)
 
-
-
 def shutdownVM(name):
     conn = libvirt.open('qemu:///system')
     machine = conn.lookupByName(name)

@@ -11,9 +11,6 @@ from .forms import VMForm
 from django.http import HttpResponseRedirect
 from django.forms import modelformset_factory
 
-class HomePageView(TemplateView):
-    template_name = "index.html"
-
 def home(request):
     template = loader.get_template('index.html')
     username = request.user.get_username()
