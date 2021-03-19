@@ -2,13 +2,15 @@ import libvirt
 import sys
 from .models import VM
 
-def createQemuVM(name, cpus, ram):
+def createQemuVM(name, cpus, ram, drivePath, driveName):
     KB = 1024 * 1024
     MB = 1024 * KB
     params = {}
     params['ram'] = ram
     params['vcpu'] = cpus
     params['name'] = name
+    params['drivePath'] = drivePath
+    params['driveName'] = driveName
     conn = libvirt.open("qemu:///system")
     xml = """<domain type='kvm'>
         <name>{}</name>
@@ -28,9 +30,17 @@ def createQemuVM(name, cpus, ram):
         <on_crash>destroy</on_crash>
         <devices>
                 <disk type='file' device='disk'>
-                    <source file='/var/lib/libvirt/images/win10.qcow2'/>
+                    <source file='{}{}'/>
                     <driver name='qemu' type='qcow2'/>
                     <target dev='vda' bus='virtio'/>
+                </disk>
+                <disk type="file" device="cdrom">
+                    <driver name="qemu" type="raw"/>
+                    <source file="/home/techtino/.cache/LibvirtISOs/install.iso"/>
+                    <target dev="sda" bus="sata"/>
+                    <readonly/>
+                    <boot order="1"/>
+                    <address type="drive" controller="0" bus="0" target="0" unit="0"/>
                 </disk>
                 <interface type="network">
                     <source network="default" />
@@ -40,21 +50,28 @@ def createQemuVM(name, cpus, ram):
                     <listen type='address' address='0.0.0.0'/>
                   </graphics>
         </devices>
-        </domain>""".format(params['name'], int(params['ram']) * KB, params['vcpu'])
+        </domain>""".format(params['name'], int(params['ram']) * KB, params['vcpu'], params['drivePath'], params['driveName'])
     conn.createXML(xml)
     conn.close()
 
-def CreateStoragePool():
+def handle_uploaded_file(f):
+    with open('/home/techtino/.cache/LibvirtISOs/install.iso', 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
+
+def CreateStorageDrive():
     conn = libvirt.open('qemu:///system')
+    path = "/var/libvirt/images"
+    params = {}
+    params['path'] = path
 
     xml = """<pool type="dir">
 	<name>vdisk</name>
 	<target>
-          <path>/var/lib/libvirt/images</path>
+          <path>{}</path>
 	</target>
-    </pool>"""
-
-    storagePool = conn.storagePoolDefineXML(xml, 0)
+    </pool>""".format(params['path'])
 
 def shutdownVM(name):
     conn = libvirt.open('qemu:///system')

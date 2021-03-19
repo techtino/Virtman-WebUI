@@ -4,6 +4,6 @@ from django.contrib import admin
 
 from .models import VM 
 
-from .models import Storage 
+from .models import StorageDisk 
 admin.site.register(VM)
-admin.site.register(Storage)
+admin.site.register(StorageDisk)
