@@ -61,6 +61,14 @@ def createQemuXML(vm_info):
     vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
     vm_xml.write(xml)
 
+def startQemuVM(machine_details):
+    conn = libvirt.open('qemu:///system')
+
+    xml_file = open("/home/techtino/XMLs/QEMU/{}.xml".format(machine_details.name))
+    xml = xml_file.read()
+    xml_file.close()
+    conn.createXML(xml)
+
 def handle_uploaded_file(f):
     with open('/home/techtino/.cache/LibvirtISOs/install.iso', 'wb+') as destination:
         for chunk in f.chunks():
@@ -70,9 +78,6 @@ def handle_uploaded_file(f):
 def CreateStorageDrive(disk_info):
     size = str(disk_info['size']) + "G"
     os.system("qemu-img create -f qcow2 {}{} {}".format(disk_info['path'],disk_info['name'],size))
-
-
-
 
 def shutdownVM(name):
     conn = libvirt.open('qemu:///system')

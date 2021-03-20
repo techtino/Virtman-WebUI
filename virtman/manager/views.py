@@ -43,7 +43,6 @@ def add(request):
            form.save()
            vm_info = form.cleaned_data
            LibvirtManagement.createQemuXML(vm_info)
-
            return redirect('/manager/listing')
     else:
         form = VMForm()
@@ -78,7 +77,8 @@ def edit(request,id):
     form = VMForm(request.POST or None, instance=instance)
     if form.is_valid():
         form.save()
-        
+        vm_info = form.cleaned_data
+        LibvirtManagement.createQemuXML(vm_info)
 
         return redirect('/manager/listing')
     return render(request, 'edit.html', {'form': form})
@@ -98,13 +98,7 @@ def startVM_View(request,id):
     get_object_or_404(VM, id=id)
     # pylint: disable=no-member
     machine = VM.objects.get(id=id)
-    name = machine.name
-    cpus = machine.cpus
-    RAM = machine.ram
-    drivePath = machine.storage_disk.path
-    driveName = machine.storage_disk.name
-    
-    #LibvirtManagement.createQemuXML(name, cpus, RAM, drivePath, driveName)
+    LibvirtManagement.startQemuVM(machine)
     return redirect('/manager/listing')
 
 @login_required
