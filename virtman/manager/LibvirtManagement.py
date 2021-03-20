@@ -1,17 +1,22 @@
 import libvirt
+import os
 import sys
-from .models import VM
+from .models import VM, StorageDisk
 
-def createQemuVM(name, cpus, ram, drivePath, driveName):
+def createQemuXML(vm_info):
     KB = 1024 * 1024
     MB = 1024 * KB
-    params = {}
-    params['ram'] = ram
-    params['vcpu'] = cpus
-    params['name'] = name
-    params['drivePath'] = drivePath
-    params['driveName'] = driveName
-    conn = libvirt.open("qemu:///system")
+    
+    storage_device = str(vm_info['storage_disk'])
+
+    #Generate drive ID by isolating the number from form info
+    drive_id = ''.join(i for i in storage_device if i.isdigit())
+    
+    #Getting drive path and name
+    drive_path = StorageDisk.objects.get(id=drive_id).path
+    drive_name = StorageDisk.objects.get(id=drive_id).name
+
+    #Generate XML template for VM
     xml = """<domain type='kvm'>
         <name>{}</name>
         <memory unit='KiB'>{}</memory>
@@ -50,9 +55,11 @@ def createQemuVM(name, cpus, ram, drivePath, driveName):
                     <listen type='address' address='0.0.0.0'/>
                   </graphics>
         </devices>
-        </domain>""".format(params['name'], int(params['ram']) * KB, params['vcpu'], params['drivePath'], params['driveName'])
-    conn.createXML(xml)
-    conn.close()
+        </domain>""".format(vm_info['name'], int(vm_info['ram']) * KB, vm_info['cpus'], drive_path, drive_name)
+
+    #Write XML to a file
+    vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
+    vm_xml.write(xml)
 
 def handle_uploaded_file(f):
     with open('/home/techtino/.cache/LibvirtISOs/install.iso', 'wb+') as destination:
@@ -60,18 +67,12 @@ def handle_uploaded_file(f):
             destination.write(chunk)
 
 
-def CreateStorageDrive():
-    conn = libvirt.open('qemu:///system')
-    path = "/var/libvirt/images"
-    params = {}
-    params['path'] = path
+def CreateStorageDrive(disk_info):
+    size = str(disk_info['size']) + "G"
+    os.system("qemu-img create -f qcow2 {}{} {}".format(disk_info['path'],disk_info['name'],size))
 
-    xml = """<pool type="dir">
-	<name>vdisk</name>
-	<target>
-          <path>{}</path>
-	</target>
-    </pool>""".format(params['path'])
+
+
 
 def shutdownVM(name):
     conn = libvirt.open('qemu:///system')

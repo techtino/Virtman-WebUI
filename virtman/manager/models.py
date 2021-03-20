@@ -17,6 +17,10 @@ class VM(models.Model):
     cpus = models.IntegerField()
     ram = models.IntegerField()
     hypervisor = models.CharField(max_length=30)
-    os = models.CharField(max_length=30)
+    OS = (
+        ('Linux', 'Linux'),
+        ('Windows', 'Windows'),
+        ('Mac', 'Mac'),)
+    os = models.CharField(max_length=30,choices=OS)
     xml = models.CharField(max_length=100)
     storage_disk = models.ForeignKey(StorageDisk, on_delete=models.CASCADE)

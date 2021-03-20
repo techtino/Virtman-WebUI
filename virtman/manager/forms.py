@@ -16,5 +16,3 @@ class storageForm(ModelForm):
 
 class isoForm(forms.Form):
     file = forms.FileField()
-
-VMFormSet = inlineformset_factory(StorageDisk, VM, fields=('name',))
