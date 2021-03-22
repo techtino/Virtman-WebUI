@@ -5,15 +5,16 @@ from .models import VM, StorageDisk
 
 def createQemuXML(vm_info):
     KB = 1024 * 1024
-    MB = 1024 * KB
-    
     storage_device = str(vm_info['storage_disk'])
 
     #Generate drive ID by isolating the number from form info
     drive_id = ''.join(i for i in storage_device if i.isdigit())
     
     #Getting drive path and name
+    # pylint: disable=no-member
     drive_path = StorageDisk.objects.get(id=drive_id).path
+
+    # pylint: disable=no-member
     drive_name = StorageDisk.objects.get(id=drive_id).name
 
     #Generate XML template for VM
@@ -60,6 +61,9 @@ def createQemuXML(vm_info):
     #Write XML to a file
     vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
     vm_xml.write(xml)
+
+def delXML(vm_name):
+    os.remove("/home/techtino/XMLs/QEMU/" + vm_name + ".xml")
 
 def startQemuVM(machine_details):
     conn = libvirt.open('qemu:///system')

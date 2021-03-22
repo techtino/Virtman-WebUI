@@ -67,7 +67,6 @@ def uploadISO(request):
             handle_uploaded_file(request.FILES['file'])
             return HttpResponseRedirect('/manager/listing')
     else:
-        print("fail")
         form = isoForm()
     return render(request, 'isoUpload.html', {'form': form})
 
@@ -77,6 +76,8 @@ def edit(request,id):
     form = VMForm(request.POST or None, instance=instance)
     if form.is_valid():
         form.save()
+        vm_name = VM.objects.get(id=id).name
+        LibvirtManagement.delXML(vm_name)
         vm_info = form.cleaned_data
         LibvirtManagement.createQemuXML(vm_info)
 
@@ -86,6 +87,8 @@ def edit(request,id):
 @login_required
 def delete(request,id):
     instance = get_object_or_404(VM, id=id)
+    vm_name = VM.objects.get(id=id).name
+    LibvirtManagement.delXML(vm_name)
     instance.delete()
     return redirect('/manager/listing')
 
