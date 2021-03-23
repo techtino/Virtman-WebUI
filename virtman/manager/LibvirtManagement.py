@@ -126,3 +126,9 @@ def getDiskStats(name):
     diskStats = machine.blockStats("/var/lib/libvirt/images/archlinux.qcow2")
 
     return diskStats
+
+def getMemoryStats(name):
+    conn = libvirt.open('qemu:///system')
+    machine = conn.lookupByName(name)
+    memoryStats = machine.memoryStats()
+    return memoryStats

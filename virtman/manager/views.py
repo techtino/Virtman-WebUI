@@ -120,9 +120,11 @@ def viewStats(request,id):
     name = machine.name
     cpu_stats = LibvirtManagement.getCPUStats(name)
     disk_stats = LibvirtManagement.getDiskStats(name)
+    memory_stats = LibvirtManagement.getMemoryStats(name)
     context = {
         'cpu_stats': cpu_stats,
-        'disk_stats': disk_stats
+        'disk_stats': disk_stats,
+        'memory_stats': memory_stats
     }
     template = loader.get_template('stats.html')
     return HttpResponse(template.render(context, request))
