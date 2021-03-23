@@ -16,7 +16,11 @@ class VM(models.Model):
     name = models.CharField(max_length=30)
     cpus = models.IntegerField()
     ram = models.IntegerField()
-    hypervisor = models.CharField(max_length=30)
+    HYPERVISOR_CHOICES = (
+        ('QEMU', 'QEMU'),
+        ('Virtualbox', 'Virtualbox'),
+        ('VMWare', 'VMWare'),)
+    hypervisor = models.CharField(max_length=30,choices=HYPERVISOR_CHOICES)
     OS = (
         ('Linux', 'Linux'),
         ('Windows', 'Windows'),
