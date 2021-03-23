@@ -1,14 +1,4 @@
 {% extends "base.html"%}
-
 {% block content %}
 <p>Hi there, welcome!</p>
-
-{% if username != "" %}
-    <a href="/manager/listing"> Listing Page</a>
-
-{% elif username == "" %}
-    <p>Not logged in</p>
-    <a href="/accounts/login"> Login</a>
-
-{% endif %}
 {%endblock content %}

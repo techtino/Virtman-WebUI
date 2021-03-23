@@ -25,10 +25,8 @@ def listing(request):
     # pylint: disable=no-member
     VM_list = VM.objects.order_by('id')[:40]
     template = loader.get_template('listing.html')
-    username = request.user.get_username()
     context = {
         'VM_list': VM_list,
-        'username': username,
     }
     return HttpResponse(template.render(context, request))
 
@@ -111,6 +109,7 @@ def stopVM_View(request,id):
     LibvirtManagement.shutdownVM(name)
     return redirect('/manager/listing')
 
+@login_required
 def viewStatsPerVM(request,id):
     get_object_or_404(VM, id=id)
     machine = VM.objects.get(id=id)
@@ -126,6 +125,7 @@ def viewStatsPerVM(request,id):
     template = loader.get_template('stats.html')
     return HttpResponse(template.render(context, request))
 
+@login_required
 def viewHostStats(request):
     cpu_usage = LibvirtManagement.getHostCPUStats()
     mem_usage = LibvirtManagement.getHostMemoryStats()
