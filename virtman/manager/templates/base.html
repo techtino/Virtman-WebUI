@@ -7,35 +7,32 @@
     <title>Virtman</title>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="#">Virtman</a>
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="/manager/home">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/manager/listing">Listing</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/manager/viewStats">Stats</a>
-      </li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-      {% if user.is_authenticated %}
-      <li class="navbar-text">
-      {{user.get_username}}
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/accounts/logout">Logout</a>
-      </li>
-      {% else %}
-        <a class="nav-link" href="/accounts/login">Login</a>
-      {% endif %}
-      </ul>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Virtman</a>
+        <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+            <a class="nav-link" href="/manager/home">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/manager/listing">Listing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/manager/viewStats">Stats</a>
+        </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+        {% if user.is_authenticated %}
+        <li class="navbar-text">
+        {{user.get_username}}
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/accounts/logout">Logout</a>
+        </li>
+        {% else %}
+            <a class="nav-link" href="/accounts/login">Login</a>
+        {% endif %}
+        </ul>
 </nav>
-
-
-
 	<div id="content" name="content" class="main">
 		<div class="row justify-content-center">
 			<div class="col-8">

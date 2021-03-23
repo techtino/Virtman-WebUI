@@ -1,14 +1,36 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<a href="/manager/add">Add</a>
+
 {% if VM_list %}
-    <ul>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">CPU</th>
+      <th scope="col">RAM</th>
+      <th scope="col">Hypervisor</th>
+    </tr>
+  </thead>
+  <tbody>
     {% for vm in VM_list %}
-        <p>Name: {{vm.name}} CPUs: {{vm.cpus}} RAM: {{vm.ram}} Hypervisor: {{vm.hypervisor}} OS: {{vm.os}} xml: {{vm.xml}} <a href="/manager/{{ vm.id }}/edit">Edit</a>  <a href="/manager/{{ vm.id }}/delete">Delete</a>  <a href="/manager/{{ vm.id }}/startVM">Start</a> <a href="/manager/{{ vm.id }}/stopVM">Stop</a> <a href="/manager/{{ vm.id }}/viewStats">View Stats</a></p>
+        <tr>    
+        <th scope="row">{{ forloop.counter}}</th>
+        <td>{{vm.name}}</td>
+        <td>{{vm.cpus}}</td>
+        <td>{{vm.ram}}</td>
+        <td>{{vm.hypervisor}}</td>
+        <td><a href="/manager/{{ vm.id }}/edit">Edit</a>  <a href="/manager/{{ vm.id }}/delete">Delete</a>  <a href="/manager/{{ vm.id }}/startVM">Start</a> <a href="/manager/{{ vm.id }}/stopVM">Stop</a> <a href="/manager/{{ vm.id }}/viewStats">View Stats</a></td>
+        </tr>
     {% endfor %}
-    </ul>
+    
+  </tbody>
+</table>
 {% else %}
-    <p>No VMs are available.</p>
+There are no VMs available
 {% endif %}
 <a href="/manager/createDisk">Create Storage Disk</a>
 <a href="/manager/uploadISO">Choose ISO</a>
