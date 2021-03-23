@@ -94,24 +94,20 @@ def getHostCPUStats():
     conn = libvirt.open('qemu:///system')
     prev_idle = 0
     prev_total = 0
-    cpu = conn.getCPUStats(-1, 0)
-    if type(cpu) == dict:
-        for num in range(2):
-            cpu_values = conn.getCPUStats(-1,0).values()
-            idle = conn.getCPUStats(-1,0)['user']
-            total = sum(cpu_values)
-            diff_idle = idle - prev_idle
-            diff_total = total - prev_total
-            diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
-            prev_total = total
-            prev_idle = idle
-            if num == 0:
-                time.sleep(1)
-            else:
-                if diff_usage < 0:
-                    diff_usage = 0
-    else:
-        diff_usage = None
+    for num in range(2):
+        cpu_values = conn.getCPUStats(-1,0).values()
+        idle = conn.getCPUStats(-1,0)['user']
+        total = sum(cpu_values)
+        diff_idle = idle - prev_idle
+        diff_total = total - prev_total
+        diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
+        prev_total = total
+        prev_idle = idle
+        if num == 0:
+            time.sleep(0.5)
+        else:
+            if diff_usage < 0:
+                diff_usage = 0
     cpu_usage = 100 - diff_usage
     return cpu_usage
     #return stats

@@ -7,12 +7,9 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.base import TemplateView
 from . import LibvirtManagement
-from .forms import VMForm
-from .forms import storageForm
-from .forms import isoForm
+from .forms import VMForm, storageForm, isoForm
 from django.http import HttpResponseRedirect
 from django.forms import modelformset_factory
-from .LibvirtManagement import handle_uploaded_file
 
 def home(request):
     template = loader.get_template('index.html')
@@ -64,7 +61,7 @@ def uploadISO(request):
     if request.method == 'POST':
         form = isoForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_uploaded_file(request.FILES['file'])
+            LibvirtManagement.handle_uploaded_file(request.FILES['file'])
             return HttpResponseRedirect('/manager/listing')
     else:
         form = isoForm()
