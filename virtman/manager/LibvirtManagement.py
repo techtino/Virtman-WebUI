@@ -90,20 +90,15 @@ def shutdownVM(name):
     machine.destroy()
     conn.close()
 
-def getCPUStats(name):
+def getHostCPUStats():
     conn = libvirt.open('qemu:///system')
-    #stats = machine.getCPUStats(0)
-
-
     prev_idle = 0
     prev_total = 0
     cpu = conn.getCPUStats(-1, 0)
     if type(cpu) == dict:
         for num in range(2):
             cpu_values = conn.getCPUStats(-1,0).values()
-            print(cpu_values)
             idle = conn.getCPUStats(-1,0)['user']
-            print(idle)
             total = sum(cpu_values)
             diff_idle = idle - prev_idle
             diff_total = total - prev_total
@@ -117,8 +112,14 @@ def getCPUStats(name):
                     diff_usage = 0
     else:
         diff_usage = None
-    return diff_usage
+    cpu_usage = 100 - diff_usage
+    return cpu_usage
     #return stats
+
+def getGuestCPUStats(name):
+    bruh = "bruh"
+    return bruh
+
 
 def getDiskStats(name):
     conn = libvirt.open('qemu:///system')
