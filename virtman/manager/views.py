@@ -128,8 +128,13 @@ def viewStatsPerVM(request,id):
 
 def viewHostStats(request):
     cpu_usage = LibvirtManagement.getHostCPUStats()
+    mem_usage = LibvirtManagement.getHostMemoryStats()
+
+    mem_percent = mem_usage['free'] / mem_usage['total'] * 100
+
     context = {
         'cpu_usage': cpu_usage,
+        'mem_usage': mem_percent,
     }
     template = loader.get_template('host_stats.html')
     return HttpResponse(template.render(context, request))

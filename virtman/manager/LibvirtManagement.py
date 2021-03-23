@@ -104,7 +104,7 @@ def getHostCPUStats():
         prev_total = total
         prev_idle = idle
         if num == 0:
-            time.sleep(0.5)
+            time.sleep(0.05)
         else:
             if diff_usage < 0:
                 diff_usage = 0
@@ -129,3 +129,11 @@ def getMemoryStats(name):
     machine = conn.lookupByName(name)
     memoryStats = machine.memoryStats()
     return memoryStats
+
+def getHostMemoryStats():
+
+    conn = libvirt.open(None)
+    mem = conn.getMemoryStats(0)
+
+    print(mem)
+    return mem
