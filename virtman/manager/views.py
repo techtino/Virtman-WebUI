@@ -113,3 +113,16 @@ def stopVM_View(request,id):
     
     LibvirtManagement.shutdownVM(name)
     return redirect('/manager/listing')
+
+def viewStats(request,id):
+    get_object_or_404(VM, id=id)
+    machine = VM.objects.get(id=id)
+    name = machine.name
+    cpu_stats = LibvirtManagement.getCPUStats(name)
+    disk_stats = LibvirtManagement.getDiskStats(name)
+    context = {
+        'cpu_stats': cpu_stats,
+        'disk_stats': disk_stats
+    }
+    template = loader.get_template('stats.html')
+    return HttpResponse(template.render(context, request))

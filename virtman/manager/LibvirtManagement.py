@@ -1,6 +1,7 @@
 import libvirt
 import os
 import sys
+import time
 from .models import VM, StorageDisk
 
 def createQemuXML(vm_info):
@@ -88,3 +89,40 @@ def shutdownVM(name):
     machine = conn.lookupByName(name)
     machine.destroy()
     conn.close()
+
+def getCPUStats(name):
+    conn = libvirt.open('qemu:///system')
+    #stats = machine.getCPUStats(0)
+
+
+    prev_idle = 0
+    prev_total = 0
+    cpu = conn.getCPUStats(-1, 0)
+    if type(cpu) == dict:
+        for num in range(2):
+            cpu_values = conn.getCPUStats(-1,0).values()
+            print(cpu_values)
+            idle = conn.getCPUStats(-1,0)['user']
+            print(idle)
+            total = sum(cpu_values)
+            diff_idle = idle - prev_idle
+            diff_total = total - prev_total
+            diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
+            prev_total = total
+            prev_idle = idle
+            if num == 0:
+                time.sleep(1)
+            else:
+                if diff_usage < 0:
+                    diff_usage = 0
+    else:
+        diff_usage = None
+    return diff_usage
+    #return stats
+
+def getDiskStats(name):
+    conn = libvirt.open('qemu:///system')
+    machine = conn.lookupByName(name)
+    diskStats = machine.blockStats("/var/lib/libvirt/images/archlinux.qcow2")
+
+    return diskStats
