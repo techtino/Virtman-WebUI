@@ -2,10 +2,12 @@
 
 {% block content %}
 
+<div class="dropdown show">
 <form id="DeleteVM"> </form>
 <a class="btn btn-primary" href="/manager/add">Add VM</a>
 <a class="btn btn-primary" href="/manager/createDisk">Create Disk</a>
 <a class="btn btn-primary" href="/manager/uploadISO">Choose ISO</a>
+
 {% if VM_list %}
 <table class="table">
   <thead>
@@ -17,6 +19,7 @@
       <th scope"col">Disk</th>
       <th scope="col">Hypervisor</th>
       <th scope="col">Actions</th>
+      <th scope="col">State</th>
       <th scope="col" style="text-align: center"><button form="DeleteVM" type="submit" formmethod="post" class="btn btn-primary">Delete</button></th>
     </tr>
   </thead>
@@ -32,25 +35,29 @@
         <td>
         {% if vm.state == 'ON' %}
         <button type="button" class="btn btn-primary" disabled>Start</button>
-        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Stop
-        <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-        /manager/{{ vm.id }}/stopVM
-        </ul>
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Stop
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <a class="dropdown-item" href="#">Shutdown</a>
+          <a class="dropdown-item" href="#">Restart</a>
+          <a class="dropdown-item" href="/manager/{{ vm.id }}/stopVM">Force Off</a>
+        </div>
         <br>
         <a class="btn btn-primary" href="/manager/{{ vm.id }}/viewStats">Stats</a> 
         <a class="btn btn-primary" href="/manager/{{ vm.id }}/edit">Edit</a>
         {% else %}
         <a class="btn btn-primary" href="/manager/{{ vm.id }}/startVM">Start </a>
-        <button type="button" class="btn btn-primary" disabled>Stop</button>
+        <button type="button" class="btn btn-primary dropdown-toggle" disabled>Stop</button>
         <br>
         <button type="button" class="btn btn-primary" disabled>Stats</button>
         <button type="button" class="btn btn-primary" disabled>Edit</button>
         {% endif %}
         {% if vm.state == "ON" %}
+        <td>Running</td>
         <td style="text-align: center"><input class="form-check-input" type="checkbox" value="" name="VMs" id="{{vm.id}}"></td>
         {% else %}
+        <td>Stopped</td>
         <td style="text-align: center"><input class="form-check-input" type="checkbox" value="" disabled></td>
         {% endif %}
         </td>
