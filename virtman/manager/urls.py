@@ -10,7 +10,6 @@ urlpatterns = [
     path('uploadISO', views.uploadISO, name='uploadISO'),
     path('home', views.home, name='home'),
     path('<int:id>/startVM', views.startVM_View, name='startVM'),
-    path('<int:id>/delete', views.delete, name='delete'),
     path('<int:id>/stopVM', views.stopVM_View, name='stopVM'),
     path('<int:id>/viewStats', views.viewStatsPerVM, name='viewStats'),
     path('viewStats', views.viewHostStats, name='viewHostStats')

@@ -28,6 +28,12 @@ def listing(request):
     context = {
         'VM_list': VM_list,
     }
+
+    if request.method == "POST":
+        IDs = request.POST.getlist('VMs')
+        for id in IDs:
+            VM.objects.filter(id=id).delete()
+
     return HttpResponse(template.render(context, request))
 
 @login_required
@@ -43,6 +49,7 @@ def add(request):
         form = VMForm()
         return render(request, 'add.html', {'form': form})
 
+@login_required
 def createDisk(request):
     if request.method == "POST":
         form = storageForm(request.POST)
@@ -55,6 +62,7 @@ def createDisk(request):
         form = storageForm()
         return render(request, 'createDisk.html', {'form': form})
 
+@login_required
 def uploadISO(request):
     if request.method == 'POST':
         form = isoForm(request.POST, request.FILES)
@@ -78,14 +86,6 @@ def edit(request,id):
 
         return redirect('/manager/listing')
     return render(request, 'edit.html', {'form': form})
-
-@login_required
-def delete(request,id):
-    instance = get_object_or_404(VM, id=id)
-    vm_name = VM.objects.get(id=id).name
-    LibvirtManagement.delXML(vm_name)
-    instance.delete()
-    return redirect('/manager/listing')
 
 @login_required
 def logout_view(request):
