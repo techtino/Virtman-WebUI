@@ -2,8 +2,10 @@
 
 {% block content %}
 
-<a href="/manager/add">Add</a>
-
+<form id="DeleteVM"> </form>
+<a class="btn btn-primary" href="/manager/add">Add VM</a>
+<a class="btn btn-primary" href="/manager/createDisk">Create Disk</a>
+<a class="btn btn-primary" href="/manager/uploadISO">Choose ISO</a>
 {% if VM_list %}
 <table class="table">
   <thead>
@@ -13,6 +15,8 @@
       <th scope="col">CPU</th>
       <th scope="col">RAM</th>
       <th scope="col">Hypervisor</th>
+      <th scope="col">Actions</th>
+      <th scope="col" style="text-align: center"><button form="DeleteVM" type="submit" formmethod="post" class="btn btn-primary">Delete</button></th>
     </tr>
   </thead>
   <tbody>
@@ -20,19 +24,34 @@
         <tr>    
         <th scope="row">{{ forloop.counter}}</th>
         <td>{{vm.name}}</td>
-        <td>{{vm.cpus}}</td>
-        <td>{{vm.ram}}</td>
+        <td>{{vm.cpus}} Cores</td>
+        <td>{{vm.ram}} MiB</td>
         <td>{{vm.hypervisor}}</td>
-        <td><a href="/manager/{{ vm.id }}/edit">Edit</a>  <a href="/manager/{{ vm.id }}/delete">Delete</a>  <a href="/manager/{{ vm.id }}/startVM">Start</a> <a href="/manager/{{ vm.id }}/stopVM">Stop</a> <a href="/manager/{{ vm.id }}/viewStats">View Stats</a></td>
+        <td>
+        {% if vm.state == 'ON' %}
+        <button type="button" class="btn btn-primary" disabled>Start</button>
+        <a class="btn btn-primary" href="/manager/{{ vm.id }}/stopVM">Stop</a> 
+        <br>
+        <a class="btn btn-primary" href="/manager/{{ vm.id }}/viewStats">Stats</a> 
+        <a class="btn btn-primary" href="/manager/{{ vm.id }}/edit">Edit</a>
+        {% else %}
+        <a class="btn btn-primary" href="/manager/{{ vm.id }}/startVM">Start </a>
+        <button type="button" class="btn btn-primary" disabled>Stop</button>
+        <br>
+        <button type="button" class="btn btn-primary" disabled>Stats</button>
+        <button type="button" class="btn btn-primary" disabled>Edit</button>
+        {% endif %}
+        {% if vm.state == "ON" %}
+        <td style="text-align: center"><input class="form-check-input" type="checkbox" value="" name="VMs" id="{{vm.id}}"></td>
+        {% else %}
+        <td style="text-align: center"><input class="form-check-input" type="checkbox" value="" disabled></td>
+        {% endif %}
+        </td>
         </tr>
     {% endfor %}
-    
   </tbody>
 </table>
 {% else %}
 There are no VMs available
 {% endif %}
-<a href="/manager/createDisk">Create Storage Disk</a>
-<a href="/manager/uploadISO">Choose ISO</a>
-<a href="/manager/viewStats">View Host Statistics</a>
 {% endblock content %}

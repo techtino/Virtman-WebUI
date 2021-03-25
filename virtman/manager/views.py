@@ -97,6 +97,7 @@ def startVM_View(request,id):
     # pylint: disable=no-member
     machine = VM.objects.get(id=id)
     LibvirtManagement.startQemuVM(machine)
+    VM.objects.filter(id=id).update(state='ON')
     return redirect('/manager/listing')
 
 @login_required
@@ -105,8 +106,8 @@ def stopVM_View(request,id):
     # pylint: disable=no-member
     machine = VM.objects.get(id=id)
     name = machine.name
-    
     LibvirtManagement.shutdownVM(name)
+    VM.objects.filter(id=id).update(state='OFF')
     return redirect('/manager/listing')
 
 @login_required

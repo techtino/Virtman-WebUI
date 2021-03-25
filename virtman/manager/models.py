@@ -26,5 +26,5 @@ class VM(models.Model):
         ('Windows', 'Windows'),
         ('Mac', 'Mac'),)
     os = models.CharField(max_length=30,choices=OS)
-    xml = models.CharField(max_length=100)
+    state = models.CharField(max_length=3)
     storage_disk = models.ForeignKey(StorageDisk, on_delete=models.CASCADE)

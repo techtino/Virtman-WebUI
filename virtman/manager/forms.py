@@ -7,7 +7,7 @@ from .models import StorageDisk
 class VMForm(ModelForm):
     class Meta:
         model = VM
-        fields = "__all__"
+        fields = ['name', 'cpus', 'ram', 'hypervisor', 'os', 'storage_disk']
 
 class storageForm(ModelForm):
     class Meta:

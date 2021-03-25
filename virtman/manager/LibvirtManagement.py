@@ -5,7 +5,6 @@ import time
 from .models import VM, StorageDisk
 
 def createQemuXML(vm_info):
-    KB = 1024 * 1024
     storage_device = str(vm_info['storage_disk'])
 
     #Generate drive ID by isolating the number from form info
@@ -21,7 +20,7 @@ def createQemuXML(vm_info):
     #Generate XML template for VM
     xml = """<domain type='kvm'>
         <name>{}</name>
-        <memory unit='KiB'>{}</memory>
+        <memory unit='MiB'>{}</memory>
         <vcpu placement='static'>{}</vcpu>
         <os>
             <type>hvm</type>
@@ -57,7 +56,7 @@ def createQemuXML(vm_info):
                     <listen type='address' address='0.0.0.0'/>
                   </graphics>
         </devices>
-        </domain>""".format(vm_info['name'], int(vm_info['ram']) * KB, vm_info['cpus'], drive_path, drive_name)
+        </domain>""".format(vm_info['name'], int(vm_info['ram']), vm_info['cpus'], drive_path, drive_name)
 
     #Write XML to a file
     vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
