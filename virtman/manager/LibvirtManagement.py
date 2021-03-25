@@ -83,10 +83,21 @@ def CreateStorageDrive(disk_info):
     size = str(disk_info['size']) + "G"
     os.system("qemu-img create -f qcow2 {}{} {}".format(disk_info['path'],disk_info['name'],size))
 
-def shutdownVM(name):
+def stopVM(name, action):
     conn = libvirt.open('qemu:///system')
     machine = conn.lookupByName(name)
-    machine.destroy()
+    if (action == "forceoff"):
+        machine.destroy()
+        VM.objects.filter(name=name).update(state='OFF')
+    elif (action == "shutdown"):
+        machine.shutdown()
+        VM.objects.filter(name=name).update(state='OFF')
+    elif (action == "reset"):
+        machine.destroy()
+        xml_file = open("/home/techtino/XMLs/QEMU/{}.xml".format(name))
+        xml = xml_file.read()
+        xml_file.close()
+        conn.createXML(xml)
     conn.close()
 
 def getHostCPUStats():

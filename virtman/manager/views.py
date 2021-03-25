@@ -33,7 +33,6 @@ def listing(request):
         IDs = request.POST.getlist('VMs')
         for id in IDs:
             VM.objects.filter(id=id).delete()
-
     return HttpResponse(template.render(context, request))
 
 @login_required
@@ -106,8 +105,28 @@ def stopVM_View(request,id):
     # pylint: disable=no-member
     machine = VM.objects.get(id=id)
     name = machine.name
-    LibvirtManagement.shutdownVM(name)
+    action = "forceoff"
+    LibvirtManagement.stopVM(name, action)
     VM.objects.filter(id=id).update(state='OFF')
+    return redirect('/manager/listing')
+
+def shutdownVM(request, id):
+    get_object_or_404(VM, id=id)
+    # pylint: disable=no-member
+    machine = VM.objects.get(id=id)
+    name = machine.name
+    action = "reset"
+    LibvirtManagement.stopVM(name, action)
+    VM.objects.filter(id=id).update(state='OFF')
+    return redirect('/manager/listing')
+
+def restartVM(request, id):
+    get_object_or_404(VM, id=id)
+    # pylint: disable=no-member
+    machine = VM.objects.get(id=id)
+    name = machine.name
+    action = "reset"
+    LibvirtManagement.stopVM(name, action)
     return redirect('/manager/listing')
 
 @login_required

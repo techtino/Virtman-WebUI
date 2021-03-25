@@ -40,12 +40,11 @@
         Stop
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a class="dropdown-item" href="#">Shutdown</a>
-          <a class="dropdown-item" href="#">Restart</a>
+          <a class="dropdown-item" href="/manager/{{ vm.id }}/shutdownVM">Shutdown</a>
+          <a class="dropdown-item" href="/manager/{{ vm.id }}/restartVM">Restart</a>
           <a class="dropdown-item" href="/manager/{{ vm.id }}/stopVM">Force Off</a>
         </div>
         <a class="btn btn-primary" href="/manager/{{ vm.id }}/viewStats">Stats</a> 
-        
         
         {% else %}
         <a class="btn btn-primary" href="/manager/{{ vm.id }}/startVM">Start</a>
