@@ -14,6 +14,7 @@
       <th scope="col">Name</th>
       <th scope="col">CPU</th>
       <th scope="col">RAM</th>
+      <th scope"col">Disk</th>
       <th scope="col">Hypervisor</th>
       <th scope="col">Actions</th>
       <th scope="col" style="text-align: center"><button form="DeleteVM" type="submit" formmethod="post" class="btn btn-primary">Delete</button></th>
@@ -26,11 +27,17 @@
         <td>{{vm.name}}</td>
         <td>{{vm.cpus}} Cores</td>
         <td>{{vm.ram}} MiB</td>
+        <td>{{vm.storage_disk}}</td>
         <td>{{vm.hypervisor}}</td>
         <td>
         {% if vm.state == 'ON' %}
         <button type="button" class="btn btn-primary" disabled>Start</button>
-        <a class="btn btn-primary" href="/manager/{{ vm.id }}/stopVM">Stop</a> 
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Stop
+        <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+        /manager/{{ vm.id }}/stopVM
+        </ul>
         <br>
         <a class="btn btn-primary" href="/manager/{{ vm.id }}/viewStats">Stats</a> 
         <a class="btn btn-primary" href="/manager/{{ vm.id }}/edit">Edit</a>

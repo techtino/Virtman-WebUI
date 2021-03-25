@@ -90,7 +90,7 @@ def shutdownVM(name):
     conn.close()
 
 def getHostCPUStats():
-    conn = libvirt.open('qemu:///system')
+    conn = libvirt.open(None)
     prev_idle = 0
     prev_total = 0
     for num in range(2):
@@ -103,7 +103,7 @@ def getHostCPUStats():
         prev_total = total
         prev_idle = idle
         if num == 0:
-            time.sleep(0.05)
+            time.sleep(0.01)
         else:
             if diff_usage < 0:
                 diff_usage = 0
