@@ -6,8 +6,8 @@ from django.dispatch import receiver
 # Create your models here.
 
 class StorageDisk(models.Model):
-    def _str_(self):
-        return self.path
+    def __str__(self):
+        return self.name
     name = models.CharField(max_length=30)
     path = models.CharField(max_length=30)
 
@@ -17,7 +17,6 @@ class StorageDisk(models.Model):
     )
     type = models.CharField(max_length=30,choices=TYPE_CHOICES)
     size = models.IntegerField()
-    pass
 
 def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
@@ -30,7 +29,7 @@ class OpticalDisk(models.Model):
     ISOFile = models.FileField(upload_to='bruh')
 
 class VM(models.Model):
-    def _str_(self):
+    def __str__(self):
         return self.name
     name = models.CharField(max_length=30)
     cpus = models.IntegerField()
@@ -47,7 +46,7 @@ class VM(models.Model):
     os = models.CharField(max_length=30,choices=OS)
     state = models.CharField(max_length=3)
     storage_disk = models.ForeignKey(StorageDisk, on_delete=models.CASCADE, blank=True)
-    optical_disk = models.ForeignKey(OpticalDisk, on_delete=models.CASCADE)
+    optical_disk = models.ForeignKey(OpticalDisk, on_delete=models.CASCADE, blank=True)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

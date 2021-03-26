@@ -5,17 +5,14 @@ import time
 from .models import VM, StorageDisk
 
 def createQemuXML(vm_info):
-    storage_device = str(vm_info['storage_disk'])
+    storage_device = vm_info['storage_disk']
 
-    #Generate drive ID by isolating the number from form info
-    drive_id = ''.join(i for i in storage_device if i.isdigit())
-    
     #Getting drive path and name
     # pylint: disable=no-member
-    drive_path = StorageDisk.objects.get(id=drive_id).path
+    drive_path = StorageDisk.objects.get(name=storage_device).path
 
     # pylint: disable=no-member
-    drive_name = StorageDisk.objects.get(id=drive_id).name
+    drive_name = StorageDisk.objects.get(name=storage_device).name
 
     #Generate XML template for VM
     xml = """<domain type='kvm'>

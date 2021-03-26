@@ -54,7 +54,6 @@ def createDisk(request):
     if request.method == "POST":
         form = storageForm(request.POST)
         if form.is_valid():
-           form.save()
            disk_info = form.cleaned_data
            LibvirtManagement.CreateStorageDrive(disk_info)
            return redirect('/manager/listing')
