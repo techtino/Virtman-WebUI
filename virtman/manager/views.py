@@ -1,4 +1,5 @@
 from .models import VM
+from django.contrib.auth.models import User
 from django.template import loader
 from django.http import HttpResponse, Http404
 from django.conf import settings
@@ -110,16 +111,29 @@ def stopVM_View(request,id):
     VM.objects.filter(id=id).update(state='OFF')
     return redirect('/manager/listing')
 
+@login_required
+def AdvancedMode(request):
+    userid = request.user.id
+    user = User.objects.get(pk=userid)
+    if user.profile.advanced_mode == False:
+        user.profile.advanced_mode = True
+    else:
+        user.profile.advanced_mode = False 
+    user.save()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
 def shutdownVM(request, id):
     get_object_or_404(VM, id=id)
     # pylint: disable=no-member
     machine = VM.objects.get(id=id)
     name = machine.name
-    action = "reset"
+    action = "shutdown"
     LibvirtManagement.stopVM(name, action)
     VM.objects.filter(id=id).update(state='OFF')
     return redirect('/manager/listing')
 
+@login_required
 def restartVM(request, id):
     get_object_or_404(VM, id=id)
     # pylint: disable=no-member

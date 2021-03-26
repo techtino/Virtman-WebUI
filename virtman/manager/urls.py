@@ -14,5 +14,6 @@ urlpatterns = [
     path('<int:id>/shutdownVM', views.shutdownVM, name='shutdownVM'),
     path('<int:id>/restartVM', views.restartVM, name='restartVM'),
     path('<int:id>/viewStats', views.viewStatsPerVM, name='viewStats'),
-    path('viewStats', views.viewHostStats, name='viewHostStats')
+    path('viewStats', views.viewHostStats, name='viewHostStats'),
+    path('toggleAdvancedMode', views.AdvancedMode, name='toggleAdvancedMode')
 ]
