@@ -6,21 +6,25 @@ from .models import VM, StorageDisk, OpticalDisk
 
 def createQemuXML(vm_info):
     storage_device = vm_info['storage_disk']
-    optical_device = vm_info['optical_disk']
 
-    optical_model = OpticalDisk.objects.get(name=optical_device)
+    try:
+        optical_path = OpticalDisk.objects.get(name=vm_info['optical_disk']).ISOFile.path
+        optical_attached = True
+    except:
+        optical_attached = False
 
-    optical_path = optical_model.ISOFile.path
+    try:
+        #Getting drive path and name
+        drive_path = StorageDisk.objects.get(name=storage_device).path
+        drive_name = StorageDisk.objects.get(name=storage_device).name
+        drive_attached = True
+    except:
+        drive_attached = False
 
-    #Getting drive path and name
-    # pylint: disable=no-member
-    drive_path = StorageDisk.objects.get(name=storage_device).path
-
-    # pylint: disable=no-member
-    drive_name = StorageDisk.objects.get(name=storage_device).name
-
+    HardDisk = ""
+    OpticalDiskDevice = ""
     #Generate XML template for VM
-    xml = """<domain type='kvm'>
+    xmlp1 = """<domain type='kvm'>
         <name>{}</name>
         <memory unit='MiB'>{}</memory>
         <vcpu placement='static'>{}</vcpu>
@@ -36,30 +40,42 @@ def createQemuXML(vm_info):
         <on_poweroff>destroy</on_poweroff>
         <on_reboot>restart</on_reboot>
         <on_crash>destroy</on_crash>
-        <devices>
-                <disk type='file' device='disk'>
-                    <source file='{}{}'/>
-                    <driver name='qemu' type='qcow2'/>
-                    <target dev='vda' bus='virtio'/>
-                </disk>
-                <disk type="file" device="cdrom">
-                    <driver name="qemu" type="raw"/>
-                    <source file="{}"/>
-                    <target dev="sda" bus="sata"/>
-                    <readonly/>
-                    <boot order="1"/>
-                    <address type="drive" controller="0" bus="0" target="0" unit="0"/>
-                </disk>
-                <interface type="network">
-                    <source network="default" />
-                    <model type='virtio'/>
-                </interface>
-                  <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0'>
-                    <listen type='address' address='0.0.0.0'/>
-                  </graphics>
-        </devices>
-        </domain>""".format(vm_info['name'], int(vm_info['ram']), vm_info['cpus'], drive_path, drive_name, optical_path)
+        """.format(vm_info['name'], int(vm_info['ram']), vm_info['cpus'])
 
+    if (drive_attached == True):
+        HardDisk ="""
+        <disk type='file' device='disk'>
+            <source file='{}{}'/>
+            <driver name='qemu' type='qcow2'/>
+            <target dev='vda' bus='virtio'/>
+        </disk>
+        """.format(drive_path,drive_name)
+
+    if (optical_attached == True):
+        OpticalDiskDevice ="""
+        <disk type="file" device="cdrom">
+        <driver name="qemu" type="raw"/>
+        <source file="{}"/>
+        <target dev="sda" bus="sata"/>
+        <readonly/>
+        <boot order="1"/>
+        <address type="drive" controller="0" bus="0" target="0" unit="0"/>
+        </disk>
+        """.format(optical_path)
+
+    Network = """
+    <interface type="network">
+        <source network="default" />
+        <model type='virtio'/>
+    </interface>
+        <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0'>
+        <listen type='address' address='0.0.0.0'/>
+        </graphics>
+    </devices>
+    """
+    devices = "<devices>" + HardDisk + OpticalDiskDevice + Network
+
+    xml = xmlp1 + devices + "</domain>"
     #Write XML to a file
     vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
     vm_xml.write(xml)
@@ -74,12 +90,6 @@ def startQemuVM(machine_details):
     xml = xml_file.read()
     xml_file.close()
     conn.createXML(xml)
-
-def handle_uploaded_file(f):
-    with open('/home/techtino/.cache/LibvirtISOs/install.iso', 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-
 
 def CreateStorageDrive(disk_info):
     size = str(disk_info['size']) + "G"

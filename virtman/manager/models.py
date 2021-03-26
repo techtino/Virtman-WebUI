@@ -45,8 +45,8 @@ class VM(models.Model):
         ('Mac', 'Mac'),)
     os = models.CharField(max_length=30,choices=OS)
     state = models.CharField(max_length=3)
-    storage_disk = models.ForeignKey(StorageDisk, on_delete=models.CASCADE, blank=True)
-    optical_disk = models.ForeignKey(OpticalDisk, on_delete=models.CASCADE, blank=True)
+    storage_disk = models.ForeignKey(StorageDisk, on_delete=models.CASCADE, blank=True, null=True)
+    optical_disk = models.ForeignKey(OpticalDisk, on_delete=models.CASCADE, blank=True, null=True)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
