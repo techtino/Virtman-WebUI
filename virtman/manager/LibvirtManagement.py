@@ -2,10 +2,15 @@ import libvirt
 import os
 import sys
 import time
-from .models import VM, StorageDisk
+from .models import VM, StorageDisk, OpticalDisk
 
 def createQemuXML(vm_info):
     storage_device = vm_info['storage_disk']
+    optical_device = vm_info['optical_disk']
+
+    optical_model = OpticalDisk.objects.get(name=optical_device)
+
+    optical_path = optical_model.ISOFile.path
 
     #Getting drive path and name
     # pylint: disable=no-member
@@ -39,7 +44,7 @@ def createQemuXML(vm_info):
                 </disk>
                 <disk type="file" device="cdrom">
                     <driver name="qemu" type="raw"/>
-                    <source file="/home/techtino/.cache/LibvirtISOs/install.iso"/>
+                    <source file="{}"/>
                     <target dev="sda" bus="sata"/>
                     <readonly/>
                     <boot order="1"/>
@@ -53,7 +58,7 @@ def createQemuXML(vm_info):
                     <listen type='address' address='0.0.0.0'/>
                   </graphics>
         </devices>
-        </domain>""".format(vm_info['name'], int(vm_info['ram']), vm_info['cpus'], drive_path, drive_name)
+        </domain>""".format(vm_info['name'], int(vm_info['ram']), vm_info['cpus'], drive_path, drive_name, optical_path)
 
     #Write XML to a file
     vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
