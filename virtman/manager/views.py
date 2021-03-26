@@ -67,7 +67,8 @@ def uploadISO(request):
     if request.method == 'POST':
         form = isoForm(request.POST, request.FILES)
         if form.is_valid():
-            LibvirtManagement.handle_uploaded_file(request.FILES['file'])
+            #LibvirtManagement.handle_uploaded_file(request.FILES['file'])
+            form.save()
             return HttpResponseRedirect('/manager/listing')
     else:
         form = isoForm()

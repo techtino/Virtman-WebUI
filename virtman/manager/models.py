@@ -10,8 +10,23 @@ class StorageDisk(models.Model):
         return self.path
     name = models.CharField(max_length=30)
     path = models.CharField(max_length=30)
+
+    TYPE_CHOICES = (
+        ('qcow2', 'qcow2'),
+        ('vhd', 'vhd'),
+    )
+    type = models.CharField(max_length=30,choices=TYPE_CHOICES)
     size = models.IntegerField()
     pass
+
+def user_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    return 'user_{0}/{1}'.format(instance.user.id, filename)
+
+class OpticalDisk(models.Model):
+    def __str__(self):
+        return self.path
+    ISOFile = models.FileField(upload_to='bruh')
 
 class VM(models.Model):
     def _str_(self):

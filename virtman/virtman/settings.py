@@ -30,6 +30,8 @@ ALLOWED_HOSTS = ['*']
 LOGIN_REDIRECT_URL = "/manager/home"
 LOGOUT_REDIRECT_URL = "/manager/home"
 
+MEDIA_ROOT = "/home/techtino/"
+
 # Application definition
 
 INSTALLED_APPS = [
