@@ -25,7 +25,8 @@ def user_directory_path(instance, filename):
 
 class OpticalDisk(models.Model):
     def __str__(self):
-        return self.path
+        return self.name
+    name = models.CharField(max_length=30)
     ISOFile = models.FileField(upload_to='bruh')
 
 class VM(models.Model):
@@ -45,7 +46,8 @@ class VM(models.Model):
         ('Mac', 'Mac'),)
     os = models.CharField(max_length=30,choices=OS)
     state = models.CharField(max_length=3)
-    storage_disk = models.ForeignKey(StorageDisk, on_delete=models.CASCADE)
+    storage_disk = models.ForeignKey(StorageDisk, on_delete=models.CASCADE, blank=True)
+    optical_disk = models.ForeignKey(OpticalDisk, on_delete=models.CASCADE)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

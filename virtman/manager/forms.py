@@ -6,7 +6,7 @@ from .models import VM, StorageDisk, OpticalDisk
 class VMForm(ModelForm):
     class Meta:
         model = VM
-        fields = ['name', 'cpus', 'ram', 'hypervisor', 'os', 'storage_disk']
+        fields = ['name', 'cpus', 'ram', 'hypervisor', 'os', 'storage_disk', 'optical_disk']
 
 class AdvancedVMForm(ModelForm):
     class Meta:
