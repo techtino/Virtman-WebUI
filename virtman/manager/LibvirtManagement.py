@@ -93,6 +93,7 @@ def startQemuVM(machine_details):
 
 def CreateStorageDrive(disk_info):
     size = str(disk_info['size']) + "G"
+    print(size)
     os.system("qemu-img create -f qcow2 {}{} {}".format(disk_info['path'],disk_info['name'],size))
 
 def stopVM(name, action):
@@ -118,7 +119,8 @@ def getHostCPUStats():
     prev_total = 0
     for num in range(2):
         cpu_values = conn.getCPUStats(-1,0).values()
-        idle = conn.getCPUStats(-1,0)['user']
+        #print(conn.getCPUStats(-1,0))
+        idle = conn.getCPUStats(-1,0)['kernel'] + conn.getCPUStats(-1,0)['user']
         total = sum(cpu_values)
         diff_idle = idle - prev_idle
         diff_total = total - prev_total
@@ -132,23 +134,32 @@ def getHostCPUStats():
                 diff_usage = 0
     cpu_usage = 100 - diff_usage
     return cpu_usage
-    #return stats
 
 def getGuestCPUStats(name):
-    bruh = "bruh"
-    return bruh
+    conn = libvirt.open('qemu:///system')
+    machine = conn.lookupByName(name)
 
+    t1 = time.time()
+    c1 = int (machine.info()[4])
+    time.sleep(0.05);
+    t2 = time.time();
+    c2 = int (machine.info()[4])
+    c_nums = int (machine.info()[3])
+    usage = (c2-c1)*100/((t2-t1)*c_nums*1e9)
+
+    return usage
 
 def getDiskStats(name):
     conn = libvirt.open('qemu:///system')
     machine = conn.lookupByName(name)
-    diskStats = machine.blockStats("/var/lib/libvirt/images/archlinux.qcow2")
+    diskStats = machine.blockStats("/home/techtino/Disks/MintDisk.qcow2")
 
     return diskStats
 
 def getMemoryStats(name):
     conn = libvirt.open('qemu:///system')
     machine = conn.lookupByName(name)
+    machine.setMemoryStatsPeriod(5)
     memoryStats = machine.memoryStats()
     return memoryStats
 

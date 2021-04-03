@@ -55,6 +55,7 @@ def createDisk(request):
         form = storageForm(request.POST)
         if form.is_valid():
            disk_info = form.cleaned_data
+           form.save()
            LibvirtManagement.CreateStorageDrive(disk_info)
            return redirect('/manager/listing')
     else:
@@ -151,10 +152,16 @@ def viewStatsPerVM(request,id):
     cpu_stats = LibvirtManagement.getGuestCPUStats(name)
     disk_stats = LibvirtManagement.getDiskStats(name)
     memory_stats = LibvirtManagement.getMemoryStats(name)
+
+    free_mem = float(memory_stats['unused'])
+    total_mem = float(memory_stats['available'])
+    util_mem = ((total_mem-free_mem) / total_mem)*100
+    
     context = {
         'cpu_stats': cpu_stats,
         'disk_stats': disk_stats,
-        'memory_stats': memory_stats
+        'memory_stats': memory_stats,
+        'memory_usage': util_mem
     }
     template = loader.get_template('stats.html')
     return HttpResponse(template.render(context, request))
