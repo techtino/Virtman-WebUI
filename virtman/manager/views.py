@@ -85,8 +85,8 @@ def edit(request,id):
     form = VMForm(request.POST or None, instance=instance)
     if form.is_valid():
         form.save()
-        vm_name = VM.objects.get(id=id).name
-        LibvirtManagement.delXML(vm_name)
+        vm = VM.objects.get(id=id)
+        LibvirtManagement.delVM(vm)
         vm_info = form.cleaned_data
         if vm_info['hypervisor'] == "QEMU":
             LibvirtManagement.createQemuXML(vm_info)

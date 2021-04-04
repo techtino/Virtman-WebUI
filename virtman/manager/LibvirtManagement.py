@@ -80,7 +80,15 @@ def createQemuXML(vm_info):
     #Write XML to a file
     vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
     vm_xml.write(xml)
+    conn = libvirt.open("qemu:///system")
 
+    try:
+        machine = conn.lookupByName(vm_info['name'])
+        machine.undefine()
+    except:
+        pass
+    conn.defineXML(xml)
+    
 def createVirtualboxXML(vm_info):
 
     storage_device = vm_info['storage_disk']
@@ -269,8 +277,8 @@ def getGuestCPUStats(name):
 
     t1 = time.time()
     c1 = int (machine.info()[4])
-    time.sleep(0.01);
-    t2 = time.time();
+    time.sleep(0.01)
+    t2 = time.time()
     c2 = int (machine.info()[4])
     c_nums = int (machine.info()[3])
     usage = (c2-c1)*100/((t2-t1)*c_nums*1e9)

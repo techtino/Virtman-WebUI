@@ -31,6 +31,7 @@ LOGIN_REDIRECT_URL = "/manager/home"
 LOGOUT_REDIRECT_URL = "/manager/home"
 
 MEDIA_ROOT = "/home/techtino/"
+STATIC_ROOT = "statics/"
 
 # Application definition
 
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'ckeditor',
 ]
 
 MIDDLEWARE = [
