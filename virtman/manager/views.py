@@ -41,10 +41,13 @@ def add(request):
     if request.method == "POST":
         form = VMForm(request.POST)
         if form.is_valid():
-           form.save()
-           vm_info = form.cleaned_data
-           LibvirtManagement.createQemuXML(vm_info)
-           return redirect('/manager/listing')
+            form.save()
+            vm_info = form.cleaned_data
+            if vm_info['hypervisor'] == "QEMU":
+                LibvirtManagement.createQemuXML(vm_info)
+            elif vm_info['hypervisor'] == "Virtualbox":
+                LibvirtManagement.createVirtualboxXML(vm_info)
+            return redirect('/manager/listing')
     else:
         form = VMForm()
         return render(request, 'add.html', {'form': form})
@@ -83,8 +86,10 @@ def edit(request,id):
         vm_name = VM.objects.get(id=id).name
         LibvirtManagement.delXML(vm_name)
         vm_info = form.cleaned_data
-        LibvirtManagement.createQemuXML(vm_info)
-
+        if vm_info['hypervisor'] == "QEMU":
+            LibvirtManagement.createQemuXML(vm_info)
+        elif vm_info['hypervisor'] == "Virtualbox":
+            LibvirtManagement.createVirtualboxXML(vm_info)
         return redirect('/manager/listing')
     return render(request, 'edit.html', {'form': form})
 
@@ -106,9 +111,8 @@ def stopVM_View(request,id):
     get_object_or_404(VM, id=id)
     # pylint: disable=no-member
     machine = VM.objects.get(id=id)
-    name = machine.name
     action = "forceoff"
-    LibvirtManagement.stopVM(name, action)
+    LibvirtManagement.stopVM(machine, action)
     VM.objects.filter(id=id).update(state='OFF')
     return redirect('/manager/listing')
 
@@ -128,9 +132,8 @@ def shutdownVM(request, id):
     get_object_or_404(VM, id=id)
     # pylint: disable=no-member
     machine = VM.objects.get(id=id)
-    name = machine.name
     action = "shutdown"
-    LibvirtManagement.stopVM(name, action)
+    LibvirtManagement.stopVM(machine, action)
     VM.objects.filter(id=id).update(state='OFF')
     return redirect('/manager/listing')
 
@@ -139,9 +142,8 @@ def restartVM(request, id):
     get_object_or_404(VM, id=id)
     # pylint: disable=no-member
     machine = VM.objects.get(id=id)
-    name = machine.name
     action = "reset"
-    LibvirtManagement.stopVM(name, action)
+    LibvirtManagement.stopVM(machine, action)
     return redirect('/manager/listing')
 
 @login_required
