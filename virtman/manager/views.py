@@ -33,7 +33,9 @@ def listing(request):
     if request.method == "POST":
         IDs = request.POST.getlist('VMs')
         for id in IDs:
-            VM.objects.filter(id=id).delete()
+            VirtualMachine = VM.objects.get(id=id)
+            LibvirtManagement.delVM(VirtualMachine)
+            VirtualMachine.delete()
     return HttpResponse(template.render(context, request))
 
 @login_required

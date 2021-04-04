@@ -135,6 +135,15 @@ def createVirtualboxXML(vm_info):
         </disk>
         """.format(drive_path,drive_name)
     
+    if optical_attached == True:
+        OpticalDiskDevice = """
+        <disk type="file" device="cdrom">
+        <source file="{}"/>
+        <target dev="sdb" bus="sata"/>
+        <address type="drive" controller="0" bus="0" target="0" unit="1"/>
+        </disk>
+        """.format(optical_path)
+    
     xmlp2 = """
         <controller type="sata" index="0"/>
         <interface type='user'>
@@ -163,7 +172,7 @@ def createVirtualboxXML(vm_info):
     </devices>
     </domain>
             """
-    xml = xmlp1 + HardDisk + xmlp2
+    xml = xmlp1 + HardDisk + OpticalDiskDevice + xmlp2
     vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
     vm_xml.write(xml)
     virtualboxcon = libvirt.open("vbox:///session")
@@ -175,8 +184,18 @@ def createVirtualboxXML(vm_info):
 
     virtualboxcon.defineXML(xml)
 
-def delXML(vm_name):
-    os.remove("/home/techtino/XMLs/QEMU/" + vm_name + ".xml")
+def delVM(VirtualMachine):
+    hypervisor = VirtualMachine.hypervisor
+    if hypervisor == 'QEMU':
+        conn = libvirt.open("qemu:///system")
+    elif hypervisor == 'Virtualbox':
+        conn = libvirt.open("vbox:///session")
+    elif hypervisor == 'VMware':
+        conn = libvirt.open("qemu:///system")
+
+    machine = conn.lookupByName(VirtualMachine.name)
+    machine.undefine()
+    os.remove("/home/techtino/XMLs/QEMU/" + VirtualMachine.name + ".xml")
 
 def startQemuVM(machine_details):
     hypervisor = machine_details.hypervisor
