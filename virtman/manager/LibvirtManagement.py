@@ -209,10 +209,8 @@ def startQemuVM(machine_details):
     hypervisor = machine_details.hypervisor
     if hypervisor == 'QEMU':
         conn = libvirt.open('qemu:///system')
-        xml_file = open("/home/techtino/XMLs/QEMU/{}.xml".format(machine_details.name))
-        xml = xml_file.read()
-        xml_file.close()
-        conn.createXML(xml)
+        machine = conn.lookupByName(machine_details.name)
+        machine.create()
     elif hypervisor == 'Virtualbox':
         conn = libvirt.open('vbox:///session')
         os.system("vboxmanage startvm " + machine_details.name)
