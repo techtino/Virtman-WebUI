@@ -18,5 +18,5 @@ urlpatterns = [
     path('<int:id>/viewStats', views.viewStatsPerVM, name='viewStats'),
     path('viewStats', views.viewHostStats, name='viewHostStats'),
     path('toggleAdvancedMode', views.AdvancedMode, name='toggleAdvancedMode'),
-    path('vnc', views.vnc_proxy_http, name='vnc'),
+    path('<int:id>/vnc', views.vnc_proxy_http, name='vnc'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

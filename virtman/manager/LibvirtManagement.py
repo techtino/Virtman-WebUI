@@ -3,6 +3,7 @@ import os
 import sys
 import time
 from .models import VM, StorageDisk, OpticalDisk
+from xml.etree import ElementTree as ET
 
 def createQemuXML(vm_info):
 
@@ -158,7 +159,7 @@ def createVirtualboxXML(vm_info):
         <mac address='56:16:3e:5d:c7:9e'/>
         <model type='82540eM'/>
         </interface>
-        <graphics type='desktop'/>
+        <graphics type='vnc' autoport='yes' multiUser='yes'/>
         <sound model='sb16'/>
         <hostdev mode='subsystem' type='usb'>
         <source>
@@ -213,7 +214,7 @@ def startQemuVM(machine_details):
         machine.create()
     elif hypervisor == 'Virtualbox':
         conn = libvirt.open('vbox:///session')
-        os.system("vboxmanage startvm " + machine_details.name)
+        os.system("vboxmanage startvm " + machine_details.name + " --type headless")
     elif hypervisor == 'VMWare':
         conn = libvirt.open('qemu:///system')
 
@@ -298,9 +299,17 @@ def getMemoryStats(name):
     return memoryStats
 
 def getHostMemoryStats():
-
     conn = libvirt.open(None)
     mem = conn.getMemoryStats(0)
-
-    print(mem)
     return mem
+
+def getVNCPort(machine_details):
+    conn = libvirt.open("qemu:///system")
+    domain = conn.lookupByName(machine_details.name)
+    #get the XML description of the VM
+    vmXml = domain.XMLDesc(0)
+    root = ET.fromstring(vmXml)
+    #get the VNC port
+    graphics = root.find('./devices/graphics')
+    port = graphics.get('port')
+    return port

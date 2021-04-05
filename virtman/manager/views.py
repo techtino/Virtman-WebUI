@@ -11,6 +11,7 @@ from . import LibvirtManagement
 from .forms import VMForm, storageForm, isoForm
 from django.http import HttpResponseRedirect
 from django.forms import modelformset_factory
+import os
 
 def home(request):
     template = loader.get_template('index.html')
@@ -184,21 +185,13 @@ def viewHostStats(request):
     template = loader.get_template('host_stats.html')
     return HttpResponse(template.render(context, request))
 
-def vnc_proxy_http(request):
-
-    token = request.GET.get('token')
-    #obj = Server.objects.get(token=token)
-
-    host = "127.0.0.1"
-    port = "6080"
-    # password = obj.vnc_password
-
+@login_required
+def vnc_proxy_http(request,id):
+    machine = get_object_or_404(VM, id=id)
+    VMport = LibvirtManagement.getVNCPort(machine)
+    os.system("./statics/novnc/utils/launch.sh --vnc localhost:" + VMport + " &")
     template = loader.get_template('novnc/vnc.html')
     context = {
-        'token': token,
-        'host': host,
-        'port': port,
-        # 'password': password,
-        'password': 'os9527',
+        'vm': machine,
     }
     return HttpResponse(template.render(context))
