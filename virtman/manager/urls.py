@@ -1,6 +1,8 @@
 from django.urls import path
 
 from . import views
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path('listing', views.listing, name='listing'),
@@ -15,5 +17,6 @@ urlpatterns = [
     path('<int:id>/restartVM', views.restartVM, name='restartVM'),
     path('<int:id>/viewStats', views.viewStatsPerVM, name='viewStats'),
     path('viewStats', views.viewHostStats, name='viewHostStats'),
-    path('toggleAdvancedMode', views.AdvancedMode, name='toggleAdvancedMode')
-]
+    path('toggleAdvancedMode', views.AdvancedMode, name='toggleAdvancedMode'),
+    path('vnc', views.vnc_proxy_http, name='vnc'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

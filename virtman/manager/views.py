@@ -1,4 +1,4 @@
-from .models import VM
+from .models import VM, Server
 from django.contrib.auth.models import User
 from django.template import loader
 from django.http import HttpResponse, Http404
@@ -183,3 +183,22 @@ def viewHostStats(request):
     }
     template = loader.get_template('host_stats.html')
     return HttpResponse(template.render(context, request))
+
+def vnc_proxy_http(request):
+
+    token = request.GET.get('token')
+    #obj = Server.objects.get(token=token)
+
+    host = "127.0.0.1"
+    port = "6080"
+    # password = obj.vnc_password
+
+    template = loader.get_template('novnc/vnc.html')
+    context = {
+        'token': token,
+        'host': host,
+        'port': port,
+        # 'password': password,
+        'password': 'os9527',
+    }
+    return HttpResponse(template.render(context))

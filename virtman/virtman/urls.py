@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include,path
 from .views import redirect_view
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -23,4 +25,4 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('manager/', include('manager.urls')),
     path('', redirect_view),
-]
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

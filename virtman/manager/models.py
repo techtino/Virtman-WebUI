@@ -60,3 +60,8 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+class Server(models.Model):
+    name = models.CharField(max_length=30)
+    token = models.CharField(max_length=30)
+    vnc_password = models.CharField(max_length=30)
