@@ -28,6 +28,9 @@
     <li class="nav-item">
         <a class="nav-link" href="/manager/viewStats">Stats</a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/manager/vnc">VNC</a>
+    </li>
   </ul>
   
   <ul class="nav navbar-nav navbar-right">
@@ -49,12 +52,6 @@
 	<div id="content" name="content" class="main">
 		<div class="row justify-content-center">
 			<div class="col-11">
-				<h1 class="mt-2">Virtman</h1>
-        {% if user.profile.advanced_mode == False %}
-        <h4 align="right" class="mt-2">Simple Mode</h4>
-				{% else %}
-        <h4 align="right" class="mt-2">Advanced Mode</h4>
-        {% endif %}
         <hr class="mt-0 mb-4">
 				{% block content %}
 				{% endblock %}
