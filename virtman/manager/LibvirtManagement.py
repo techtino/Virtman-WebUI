@@ -159,7 +159,7 @@ def createVirtualboxXML(vm_info):
         <mac address='56:16:3e:5d:c7:9e'/>
         <model type='82540eM'/>
         </interface>
-        <graphics type='vnc' autoport='yes' multiUser='yes'/>
+        <graphics type='rdp' autoport='yes' multiUser='yes'/>
         <sound model='sb16'/>
         <hostdev mode='subsystem' type='usb'>
         <source>
@@ -214,6 +214,8 @@ def startQemuVM(machine_details):
         machine.create()
     elif hypervisor == 'Virtualbox':
         conn = libvirt.open('vbox:///session')
+        os.system("VBoxManage modifyvm " + machine_details.name + " --vrde on")
+        os.system("VBoxManage modifyvm " + machine_details.name + " --vrdeproperty VNCPassword=secret")
         os.system("vboxmanage startvm " + machine_details.name + " --type headless")
     elif hypervisor == 'VMWare':
         conn = libvirt.open('qemu:///system')
@@ -304,12 +306,20 @@ def getHostMemoryStats():
     return mem
 
 def getVNCPort(machine_details):
-    conn = libvirt.open("qemu:///system")
+
+    if machine_details.hypervisor == "QEMU":
+        conn = libvirt.open("qemu:///system")
+    elif machine_details.hypervisor == "Virtualbox":
+        conn = libvirt.open("vbox:///session")
     domain = conn.lookupByName(machine_details.name)
     #get the XML description of the VM
     vmXml = domain.XMLDesc(0)
     root = ET.fromstring(vmXml)
     #get the VNC port
-    graphics = root.find('./devices/graphics')
-    port = graphics.get('port')
+    graphics = root.findall('./devices/graphics')
+    print(graphics)
+
+    for i in graphics:
+        port = i.get('port')
+
     return port

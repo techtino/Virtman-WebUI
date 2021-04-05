@@ -189,7 +189,7 @@ def viewHostStats(request):
 def vnc_proxy_http(request,id):
     machine = get_object_or_404(VM, id=id)
     VMport = LibvirtManagement.getVNCPort(machine)
-    os.system("./statics/novnc/utils/launch.sh --vnc localhost:" + VMport + " &")
+    os.system("./statics/novnc/utils/launch.sh --idle-timeout 15 --vnc localhost:" + VMport + " &")
     template = loader.get_template('novnc/vnc.html')
     context = {
         'vm': machine,
