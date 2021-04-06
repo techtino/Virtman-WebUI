@@ -61,5 +61,5 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
-class XML(models.Model):
+class customVM(models.Model):
     content = models.TextField()

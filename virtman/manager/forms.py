@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm, Textarea
 from django.forms import inlineformset_factory
-from .models import VM, StorageDisk, OpticalDisk, XML
+from .models import VM, StorageDisk, OpticalDisk, customVM
 
 class VMForm(ModelForm):
     class Meta:
@@ -25,7 +25,7 @@ class isoForm(ModelForm):
 
 class XMLForm(ModelForm):
     class Meta:
-        model = XML
+        model = customVM
         fields = "__all__"
         widgets = {
             'content': Textarea(attrs={'cols': 80, 'rows': 100}),
