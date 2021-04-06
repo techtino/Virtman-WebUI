@@ -8,6 +8,7 @@ urlpatterns = [
     path('listing', views.listing, name='listing'),
     path('<int:id>/edit', views.edit, name='edit'),
     path('add', views.add, name='add'),
+    path('profile', views.profilePage, name='profile'),
     path('createDisk', views.createDisk, name='createDisk'),
     path('uploadISO', views.uploadISO, name='uploadISO'),
     path('home', views.home, name='home'),

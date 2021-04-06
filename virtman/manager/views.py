@@ -198,3 +198,9 @@ def vnc_proxy_http(request,id):
         'vm': machine,
     }
     return HttpResponse(template.render(context))
+
+def profilePage(request):
+
+    template = loader.get_template('profile.html')
+    context = {}
+    return HttpResponse(template.render(context, request))
