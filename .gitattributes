@@ -1,1 +1,2 @@
 statics/novnc/* linguist-vendored
+*.js linguist-vendored
