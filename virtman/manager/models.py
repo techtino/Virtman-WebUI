@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from ckeditor.fields import RichTextField
 # Create your models here.
 
 class StorageDisk(models.Model):
@@ -61,7 +61,5 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
-class Server(models.Model):
-    name = models.CharField(max_length=30)
-    token = models.CharField(max_length=30)
-    vnc_password = models.CharField(max_length=30)
+class XML(models.Model):
+    content = RichTextField()

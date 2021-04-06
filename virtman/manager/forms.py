@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from django.forms import inlineformset_factory
-from .models import VM, StorageDisk, OpticalDisk
+from .models import VM, StorageDisk, OpticalDisk, XML
 
 class VMForm(ModelForm):
     class Meta:
@@ -21,4 +21,9 @@ class storageForm(ModelForm):
 class isoForm(ModelForm):
     class Meta:
         model = OpticalDisk
+        fields = "__all__"
+
+class XMLForm(ModelForm):
+    class Meta:
+        model = XML
         fields = "__all__"

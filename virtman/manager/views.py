@@ -1,4 +1,4 @@
-from .models import VM, Server
+from .models import VM
 from django.contrib.auth.models import User
 from django.template import loader
 from django.http import HttpResponse, Http404
@@ -8,7 +8,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.base import TemplateView
 from . import LibvirtManagement
-from .forms import VMForm, storageForm, isoForm
+from .forms import VMForm, storageForm, isoForm, XMLForm
 from django.http import HttpResponseRedirect
 from django.forms import modelformset_factory
 import os
@@ -44,19 +44,24 @@ def listing(request):
 
 @login_required
 def add(request):
-    if request.method == "POST":
-        form = VMForm(request.POST)
-        if form.is_valid():
-            form.save()
-            vm_info = form.cleaned_data
-            if vm_info['hypervisor'] == "QEMU":
-                LibvirtManagement.createQemuXML(vm_info)
-            elif vm_info['hypervisor'] == "Virtualbox":
-                LibvirtManagement.createVirtualboxXML(vm_info)
-            return redirect('/manager/listing')
+    if request.user.profile.advanced_mode:
+        print("hello")
+        form = XMLForm(request.POST)
+        return render(request, 'advancedadd.html', {'form': form})
     else:
-        form = VMForm()
-        return render(request, 'add.html', {'form': form})
+        if request.method == "POST":
+            form = VMForm(request.POST)
+            if form.is_valid():
+                form.save()
+                vm_info = form.cleaned_data
+                if vm_info['hypervisor'] == "QEMU":
+                    LibvirtManagement.createQemuXML(vm_info)
+                elif vm_info['hypervisor'] == "Virtualbox":
+                    LibvirtManagement.createVirtualboxXML(vm_info)
+                return redirect('/manager/listing')
+        else:
+            form = VMForm()
+            return render(request, 'add.html', {'form': form})
 
 @login_required
 def createDisk(request):
@@ -197,10 +202,9 @@ def vnc_proxy_http(request,id):
     context = {
         'vm': machine,
     }
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request))
 
 def profilePage(request):
-
     template = loader.get_template('profile.html')
     context = {}
     return HttpResponse(template.render(context, request))
