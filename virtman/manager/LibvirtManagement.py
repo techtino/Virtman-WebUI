@@ -67,12 +67,16 @@ def createQemuXML(vm_info):
 
     Network = """
     <interface type="network">
-        <source network="default" />
-        <model type='virtio'/>
+    <source network="default" />
+    <model type='virtio'/>
     </interface>
-        <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0'>
-        <listen type='address' address='0.0.0.0'/>
-        </graphics>
+    <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0'>
+    <listen type='address' address='0.0.0.0'/>
+    </graphics>
+    <video>
+      <model type="qxl" ram="65536" vram="65536" vgamem="16384" heads="1" primary="yes"/>
+      <address type="pci" domain="0x0000" bus="0x00" slot="0x02" function="0x0"/>
+    </video>
     </devices>
     """
     devices = "<devices>" + HardDisk + OpticalDiskDevice + Network
@@ -245,10 +249,10 @@ def stopVM(machine, action):
         VM.objects.filter(name=name).update(state='OFF')
     elif (action == "reset"):
         machine.destroy()
-        xml_file = open("/home/techtino/XMLs/QEMU/{}.xml".format(name))
-        xml = xml_file.read()
-        xml_file.close()
-        conn.createXML(xml)
+        if hypervisor == "Virtualbox":
+            os.system("vboxmanage startvm " + name + " --type headless")
+        else:
+            machine.create()
     conn.close()
 
 def getHostCPUStats():
@@ -289,7 +293,7 @@ def getGuestCPUStats(name):
 def getDiskStats(name):
     conn = libvirt.open('qemu:///system')
     machine = conn.lookupByName(name)
-    diskStats = machine.blockStats("/home/techtino/Disks/MintDisk.qcow2")
+    #diskStats = machine.blockStats("/home/techtino/Disks/MintDisk.qcow2")
     diskStats = "hello"
     return diskStats
 

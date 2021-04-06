@@ -42,8 +42,8 @@
           <a class="dropdown-item" href="/manager/{{ vm.id }}/restartVM">Restart</a>
           <a class="dropdown-item" href="/manager/{{ vm.id }}/stopVM">Force Off</a>
         </div>
-        <a class="btn btn-primary" href="/manager/{{ vm.id }}/vnc?host=localhost&port=6080">VNC</a>
-        <a class="btn btn-primary" href="/manager/{{ vm.id }}/viewStats">Stats</a> 
+        <a class="btn btn-primary" href="/manager/{{ vm.id }}/vnc?host={{ip}}&port=6080&autoconnect=true">VNC</a>
+        <a class="btn btn-primary" href="/manager/{{ vm.id }}/viewStats">Stats</a>
         
         {% else %}
         <a class="btn btn-primary" href="/manager/{{ vm.id }}/startVM">Start</a>

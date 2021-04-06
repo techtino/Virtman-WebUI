@@ -12,6 +12,7 @@ from .forms import VMForm, storageForm, isoForm
 from django.http import HttpResponseRedirect
 from django.forms import modelformset_factory
 import os
+import socket
 
 def home(request):
     template = loader.get_template('index.html')
@@ -27,8 +28,10 @@ def listing(request):
     # pylint: disable=no-member
     VM_list = VM.objects.order_by('id')[:40]
     template = loader.get_template('listing.html')
+    ip = socket.gethostname()
     context = {
         'VM_list': VM_list,
+        'ip': ip,
     }
 
     if request.method == "POST":
@@ -138,7 +141,7 @@ def shutdownVM(request, id):
     action = "shutdown"
     LibvirtManagement.stopVM(machine, action)
     VM.objects.filter(id=id).update(state='OFF')
-    return redirect('/manager/listing')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 @login_required
 def restartVM(request, id):
@@ -147,7 +150,7 @@ def restartVM(request, id):
     machine = VM.objects.get(id=id)
     action = "reset"
     LibvirtManagement.stopVM(machine, action)
-    return redirect('/manager/listing')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 @login_required
 def viewStatsPerVM(request,id):
