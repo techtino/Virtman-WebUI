@@ -45,9 +45,18 @@ def listing(request):
 @login_required
 def add(request):
     if request.user.profile.advanced_mode:
-        print("hello")
-        form = XMLForm(request.POST)
-        return render(request, 'advancedadd.html', {'form': form})
+        if request.method == "POST":
+            form = XMLForm(request.POST)
+            if form.is_valid():
+                form.save()
+                vmXML = form.cleaned_data['content']
+
+                LibvirtManagement.createCustomVM(vmXML)
+
+                return redirect('/manager/listing')
+        else:
+            form = XMLForm()
+            return render(request, 'advancedadd.html', {'form': form})
     else:
         if request.method == "POST":
             form = VMForm(request.POST)

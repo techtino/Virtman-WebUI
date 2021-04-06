@@ -327,3 +327,7 @@ def getVNCPort(machine_details):
         port = i.get('port')
 
     return port
+
+def createCustomVM(machine_details):
+    conn = libvirt.open("qemu:///system")
+    machine = conn.defineXML(machine_details)
