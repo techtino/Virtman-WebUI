@@ -8,11 +8,6 @@ class VMForm(ModelForm):
         model = VM
         fields = ['name', 'cpus', 'ram', 'hypervisor', 'os', 'storage_disk', 'optical_disk']
 
-class AdvancedVMForm(ModelForm):
-    class Meta:
-        model = VM
-        fields = ['name', 'cpus', 'ram', 'hypervisor', 'os', 'storage_disk']
-
 class storageForm(ModelForm):
     class Meta:
         model = StorageDisk
@@ -26,7 +21,7 @@ class isoForm(ModelForm):
 class XMLForm(ModelForm):
     class Meta:
         model = customVM
-        fields = "__all__"
+        fields = ['name','hypervisor','content']
         widgets = {
             'content': Textarea(attrs={'cols': 80, 'rows': 100}),
         }

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-CPU Usage: {{cpu_stats}}
 
 <br>Disk read requests: {{disk_stats.0}}, Bytes read {{disk_stats.1}}, Write requests sent {{disk_stats.2}}, Bytes Written {{disk_stats.3}}, Number of errors: {{disk_stats.4}}
 <br>Memory used: {{memory_stats}}

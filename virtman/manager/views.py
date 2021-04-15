@@ -1,4 +1,4 @@
-from .models import VM
+from .models import VM, customVM
 from django.contrib.auth.models import User
 from django.template import loader
 from django.http import HttpResponse, Http404
@@ -29,9 +29,11 @@ def listing(request):
     VM_list = VM.objects.order_by('id')[:40]
     template = loader.get_template('listing.html')
     ip = socket.gethostname()
+    custom_VM_list = customVM.objects.order_by('id')[:40]
     context = {
         'VM_list': VM_list,
         'ip': ip,
+        'customVM_list' : custom_VM_list,
     }
 
     if request.method == "POST":
@@ -50,10 +52,11 @@ def add(request):
             if form.is_valid():
                 form.save()
                 vmXML = form.cleaned_data['content']
-
-                LibvirtManagement.createCustomVM(vmXML)
-
-                return redirect('/manager/listing')
+                try:
+                    LibvirtManagement.createCustomVM(vmXML)
+                    return redirect('/manager/listing')
+                except:
+                    return render(request, 'advancedadd.html', {'form': form})
         else:
             form = XMLForm()
             return render(request, 'advancedadd.html', {'form': form})
@@ -114,6 +117,22 @@ def edit(request,id):
     return render(request, 'edit.html', {'form': form})
 
 @login_required
+def customEdit(request,id):
+    instance = get_object_or_404(customVM, id=id)
+    form = XMLForm(request.POST or None, instance=instance)
+    if form.is_valid():
+        form.save()
+        vm = customVM.objects.get(id=id)
+        LibvirtManagement.delVM(vm)
+        vm_info = form.cleaned_data
+        if vm_info['hypervisor'] == "QEMU":
+            LibvirtManagement.createQemuXML(vm_info)
+        elif vm_info['hypervisor'] == "Virtualbox":
+            LibvirtManagement.createVirtualboxXML(vm_info)
+        return redirect('/manager/listing')
+    return render(request, 'advanceedit.html', {'form': form})
+
+@login_required
 def logout_view(request):
     logout(request)
 
@@ -125,11 +144,19 @@ def startVM_View(request,id):
     LibvirtManagement.startQemuVM(machine)
     VM.objects.filter(id=id).update(state='ON')
     return redirect('/manager/listing')
+    
+@login_required
+def startcustomVM_View(request,id):
+    get_object_or_404(customVM, id=id)
+    # pylint: disable=no-member
+    machine = customVM.objects.get(id=id)
+    LibvirtManagement.startQemuVM(machine)
+    customVM.objects.filter(id=id).update(state='ON')
+    return redirect('/manager/listing')
 
 @login_required
 def stopVM_View(request,id):
     get_object_or_404(VM, id=id)
-    # pylint: disable=no-member
     machine = VM.objects.get(id=id)
     action = "forceoff"
     LibvirtManagement.stopVM(machine, action)
@@ -146,6 +173,16 @@ def AdvancedMode(request):
         user.profile.advanced_mode = False 
     user.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
+def stopcustomVM_View(request,id):
+    get_object_or_404(customVM, id=id)
+    # pylint: disable=no-member
+    machine = customVM.objects.get(id=id)
+    action = "forceoff"
+    LibvirtManagement.stopVM(machine, action)
+    customVM.objects.filter(id=id).update(state='OFF')
+    return redirect('/manager/listing')
 
 @login_required
 def shutdownVM(request, id):
@@ -167,9 +204,50 @@ def restartVM(request, id):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 @login_required
+def shutdowncustomVM(request, id):
+    get_object_or_404(customVM, id=id)
+    # pylint: disable=no-member
+    machine = customVM.objects.get(id=id)
+    action = "shutdown"
+    LibvirtManagement.stopVM(machine, action)
+    customVM.objects.filter(id=id).update(state='OFF')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
+def restartcustomVM(request, id):
+    get_object_or_404(customVM, id=id)
+    # pylint: disable=no-member
+    machine = customVM.objects.get(id=id)
+    action = "reset"
+    LibvirtManagement.stopVM(machine, action)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
 def viewStatsPerVM(request,id):
     get_object_or_404(VM, id=id)
     machine = VM.objects.get(id=id)
+    name = machine.name
+    cpu_stats = LibvirtManagement.getGuestCPUStats(name)
+    disk_stats = LibvirtManagement.getDiskStats(name)
+    memory_stats = LibvirtManagement.getMemoryStats(name)
+
+    free_mem = float(memory_stats['unused'])
+    total_mem = float(memory_stats['available'])
+    util_mem = ((total_mem-free_mem) / total_mem)*100
+    
+    context = {
+        'cpu_stats': cpu_stats,
+        'disk_stats': disk_stats,
+        'memory_stats': memory_stats,
+        'memory_usage': util_mem
+    }
+    template = loader.get_template('stats.html')
+    return HttpResponse(template.render(context, request))
+
+@login_required
+def viewStatsPerCustomVM(request,id):
+    get_object_or_404(customVM, id=id)
+    machine = customVM.objects.get(id=id)
     name = machine.name
     cpu_stats = LibvirtManagement.getGuestCPUStats(name)
     disk_stats = LibvirtManagement.getDiskStats(name)
@@ -216,4 +294,15 @@ def vnc_proxy_http(request,id):
 def profilePage(request):
     template = loader.get_template('profile.html')
     context = {}
+    return HttpResponse(template.render(context, request))
+
+@login_required
+def customvnc_proxy_http(request,id):
+    machine = get_object_or_404(customVM, id=id)
+    VMport = LibvirtManagement.getVNCPort(machine)
+    os.system("./statics/novnc/utils/launch.sh --idle-timeout 15 --vnc localhost:" + VMport + " &")
+    template = loader.get_template('novnc/customvnc.html')
+    context = {
+        'vm': machine,
+    }
     return HttpResponse(template.render(context, request))

@@ -13,7 +13,7 @@ class StorageDisk(models.Model):
 
     TYPE_CHOICES = (
         ('qcow2', 'qcow2'),
-        ('vhd', 'vhd'),
+        ('vmdk', 'vmdk'),
     )
     type = models.CharField(max_length=30,choices=TYPE_CHOICES)
     size = models.IntegerField()
@@ -62,4 +62,11 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 class customVM(models.Model):
+    name = models.CharField(max_length=30)
+    state = models.CharField(max_length=3)
+    HYPERVISOR_CHOICES = (
+        ('QEMU', 'QEMU'),
+        ('Virtualbox', 'Virtualbox'),
+        ('VMWare', 'VMWare'),)
+    hypervisor = models.CharField(max_length=30,choices=HYPERVISOR_CHOICES)
     content = models.TextField()

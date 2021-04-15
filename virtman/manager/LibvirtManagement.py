@@ -93,6 +93,7 @@ def createQemuXML(vm_info):
     except:
         pass
     conn.defineXML(xml)
+    conn.close()
     
 def createVirtualboxXML(vm_info):
 
@@ -196,6 +197,7 @@ def createVirtualboxXML(vm_info):
         pass
 
     virtualboxcon.defineXML(xml)
+    virtualboxcon.close()
 
 def delVM(VirtualMachine):
     hypervisor = VirtualMachine.hypervisor
@@ -208,7 +210,7 @@ def delVM(VirtualMachine):
 
     machine = conn.lookupByName(VirtualMachine.name)
     machine.undefine()
-    os.remove("/home/techtino/XMLs/QEMU/" + VirtualMachine.name + ".xml")
+    conn.close()
 
 def startQemuVM(machine_details):
     hypervisor = machine_details.hypervisor
@@ -223,6 +225,7 @@ def startQemuVM(machine_details):
         os.system("vboxmanage startvm " + machine_details.name + " --type headless")
     elif hypervisor == 'VMWare':
         conn = libvirt.open('qemu:///system')
+    conn.close()
 
 def CreateStorageDrive(disk_info):
     size = str(disk_info['size']) + "G"
@@ -274,6 +277,7 @@ def getHostCPUStats():
             if diff_usage < 0:
                 diff_usage = 0
     cpu_usage = 100 - diff_usage
+    conn.close()
     return cpu_usage
 
 def getGuestCPUStats(name):
@@ -287,7 +291,7 @@ def getGuestCPUStats(name):
     c2 = int (machine.info()[4])
     c_nums = int (machine.info()[3])
     usage = (c2-c1)*100/((t2-t1)*c_nums*1e9)
-
+    conn.close()
     return usage
 
 def getDiskStats(name):
@@ -295,6 +299,7 @@ def getDiskStats(name):
     machine = conn.lookupByName(name)
     #diskStats = machine.blockStats("/home/techtino/Disks/MintDisk.qcow2")
     diskStats = "hello"
+    conn.close()
     return diskStats
 
 def getMemoryStats(name):
@@ -302,11 +307,13 @@ def getMemoryStats(name):
     machine = conn.lookupByName(name)
     machine.setMemoryStatsPeriod(5)
     memoryStats = machine.memoryStats()
+    conn.close()
     return memoryStats
 
 def getHostMemoryStats():
     conn = libvirt.open(None)
     mem = conn.getMemoryStats(0)
+    conn.close()
     return mem
 
 def getVNCPort(machine_details):
@@ -325,7 +332,7 @@ def getVNCPort(machine_details):
 
     for i in graphics:
         port = i.get('port')
-
+    conn.close()
     return port
 
 def createCustomVM(machine_details):
