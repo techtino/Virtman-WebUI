@@ -42,6 +42,11 @@ def listing(request):
             VirtualMachine = VM.objects.get(id=id)
             LibvirtManagement.delVM(VirtualMachine)
             VirtualMachine.delete()
+        IDs = request.POST.getlist('customVMs')
+        for id in IDs:
+            VirtualMachine = customVM.objects.get(id=id)
+            LibvirtManagement.delVM(VirtualMachine)
+            VirtualMachine.delete()
     return HttpResponse(template.render(context, request))
 
 @login_required

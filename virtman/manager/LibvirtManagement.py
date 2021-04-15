@@ -82,9 +82,6 @@ def createQemuXML(vm_info):
     devices = "<devices>" + HardDisk + OpticalDiskDevice + Network
 
     xml = xmlp1 + devices + "</domain>"
-    #Write XML to a file
-    vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
-    vm_xml.write(xml)
     conn = libvirt.open("qemu:///system")
 
     try:
@@ -187,8 +184,6 @@ def createVirtualboxXML(vm_info):
     </domain>
             """
     xml = xmlp1 + HardDisk + OpticalDiskDevice + xmlp2
-    vm_xml = open("/home/techtino/XMLs/QEMU/{}.xml".format(vm_info['name']),'w+')
-    vm_xml.write(xml)
     virtualboxcon = libvirt.open("vbox:///session")
     try:
         machine = virtualboxcon.lookupByName(vm_info['name'])

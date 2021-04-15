@@ -68,6 +68,7 @@
 There are no regular VMs available
 {% endif %}
 <br>
+Advanced/Custom VMs:
 <br>
 {% if customVM_list and user.profile.advanced_mode %}
 <table class="table">
@@ -110,7 +111,7 @@ There are no regular VMs available
         <td style="text-align: center"><input class="form-check-input" type="checkbox" disabled></td>
         {% else %}
         <td>Stopped</td>
-        <td style="text-align: center"><input class="form-check-input" form="delete_form" type="checkbox" value="{{ vm.id }}" id="{{ vm.id }}" name="VMs"></td>
+        <td style="text-align: center"><input class="form-check-input" form="delete_form" type="checkbox" value="{{ vm.id }}" id="{{ vm.id }}" name="customVMs"></td>
         {% endif %}
         
     {% endfor %}
