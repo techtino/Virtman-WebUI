@@ -1,11 +1,13 @@
 import libvirt
 import os
+import shutil
 import sys
 import time
 from .models import VM, StorageDisk, OpticalDisk
 from xml.etree import ElementTree as ET
 
 def createQemuXML(vm_info):
+    # similar to vbox function, no need to comment again
 
     storage_device = vm_info['storage_disk']
 
@@ -96,6 +98,7 @@ def createVirtualboxXML(vm_info):
 
     storage_device = vm_info['storage_disk']
 
+    # check if optical disk was chosen and sets true or false
     try:
         optical_path = OpticalDisk.objects.get(name=vm_info['optical_disk']).ISOFile.path
         optical_attached = True
@@ -113,6 +116,7 @@ def createVirtualboxXML(vm_info):
     HardDisk = ""
     OpticalDiskDevice = ""
 
+    # produce xml template specific to vbox with variables inputted with .format
     xmlp1 = """
     <domain type='vbox'>
         <name>{}</name>
@@ -137,6 +141,7 @@ def createVirtualboxXML(vm_info):
         <devices>
         """.format(vm_info['name'],int(vm_info['ram']),vm_info['cpus'])
 
+    # add disk drive to xml spec if selected in form
     if drive_attached == True:
         HardDisk = """
         <disk type='file' device='disk'>
@@ -146,6 +151,7 @@ def createVirtualboxXML(vm_info):
         </disk>
         """.format(drive_path,drive_name)
     
+    # add optical disk to spec if selected in form
     if optical_attached == True:
         OpticalDiskDevice = """
         <disk type="file" device="cdrom">
@@ -155,6 +161,7 @@ def createVirtualboxXML(vm_info):
         </disk>
         """.format(optical_path)
     
+    # second part of xml, configure rest of components such as controllers, vnc and video
     xmlp2 = """
         <controller type="sata" index="0"/>
         <interface type='user'>
@@ -183,7 +190,11 @@ def createVirtualboxXML(vm_info):
     </devices>
     </domain>
             """
+
+    # combine all required parts of XML
     xml = xmlp1 + HardDisk + OpticalDiskDevice + xmlp2
+
+    # connects to virtualbox with libvirt, checks if exists already, then creates a new one
     virtualboxcon = libvirt.open("vbox:///session")
     try:
         machine = virtualboxcon.lookupByName(vm_info['name'])
@@ -194,58 +205,237 @@ def createVirtualboxXML(vm_info):
     virtualboxcon.defineXML(xml)
     virtualboxcon.close()
 
+def createVMWareXML(vm_info):
+    storage_device = vm_info['storage_disk']
+
+    try:
+        optical_path = OpticalDisk.objects.get(name=vm_info['optical_disk']).ISOFile.path
+        optical_attached = True
+    except:
+        optical_attached = False
+
+    try:
+        #Getting drive path and name
+        drive_path = StorageDisk.objects.get(name=storage_device).path
+        drive_name = StorageDisk.objects.get(name=storage_device).name
+        drive_attached = True
+    except:
+        drive_attached = False
+
+    vmxTemplate = """
+    #!/usr/bin/vmware
+    .encoding = "UTF-8"
+    config.version = "8"
+    virtualHW.version = "18"
+    mks.enable3d = "TRUE"
+    pciBridge0.present = "TRUE"
+    pciBridge4.present = "TRUE"
+    pciBridge4.virtualDev = "pcieRootPort"
+    pciBridge4.functions = "8"
+    pciBridge5.present = "TRUE"
+    pciBridge5.virtualDev = "pcieRootPort"
+    pciBridge5.functions = "8"
+    pciBridge6.present = "TRUE"
+    pciBridge6.virtualDev = "pcieRootPort"
+    pciBridge6.functions = "8"
+    pciBridge7.present = "TRUE"
+    pciBridge7.virtualDev = "pcieRootPort"
+    pciBridge7.functions = "8"
+    vmci0.present = "TRUE"
+    hpet0.present = "TRUE"
+    nvram = "{}.nvram"
+    virtualHW.productCompatibility = "hosted"
+    powerType.powerOff = "soft"
+    powerType.powerOn = "soft"
+    powerType.suspend = "soft"
+    powerType.reset = "soft"
+    displayName = "{}"
+    usb.vbluetooth.startConnected = "TRUE"
+    firmware = "efi"
+    sensor.location = "pass-through"
+    guestOS = "windows9-64"
+    tools.syncTime = "FALSE"
+    sound.autoDetect = "TRUE"
+    sound.virtualDev = "hdaudio"
+    sound.fileName = "-1"
+    sound.present = "TRUE"
+    numvcpus = "{}"
+    cpuid.coresPerSocket = "2"
+    memsize = "{}"
+    mem.hotadd = "TRUE"
+    sata0.present = "TRUE"
+    nvme0.present = "TRUE"
+    nvme0:0.present = "TRUE"
+    sata0:1.deviceType = "cdrom-image"
+    usb.present = "TRUE"
+    ehci.present = "TRUE"
+    usb_xhci.present = "TRUE"
+    svga.graphicsMemoryKB = "8388608"
+    ethernet0.connectionType = "nat"
+    ethernet0.addressType = "generated"
+    ethernet0.virtualDev = "e1000e"
+    serial0.fileType = "device"
+    serial0.fileName = "thinprint"
+    ethernet0.present = "TRUE"
+    serial0.present = "TRUE"
+    extendedConfigFile = "Windows 10 x64.vmxf"
+    floppy0.present = "FALSE"
+    numa.autosize.cookie = "20022"
+    numa.autosize.vcpu.maxPerVirtualNode = "2"
+    uuid.bios = "56 4d 22 c7 04 0d 9e 93-63 4c 77 26 24 c7 63 f5"
+    uuid.location = "56 4d 22 c7 04 0d 9e 93-63 4c 77 26 24 c7 63 f5"
+    vm.genid = "2977167825520945118"
+    vm.genidX = "1511474261418836335"
+    nvme0:0.redo = ""
+    pciBridge0.pciSlotNumber = "17"
+    pciBridge4.pciSlotNumber = "21"
+    pciBridge5.pciSlotNumber = "22"
+    pciBridge6.pciSlotNumber = "23"
+    pciBridge7.pciSlotNumber = "24"
+    usb.pciSlotNumber = "32"
+    ethernet0.pciSlotNumber = "160"
+    sound.pciSlotNumber = "33"
+    ehci.pciSlotNumber = "34"
+    usb_xhci.pciSlotNumber = "192"
+    vmci0.pciSlotNumber = "35"
+    sata0.pciSlotNumber = "36"
+    nvme0.pciSlotNumber = "224"
+    svga.vramSize = "268435456"
+    vmotion.checkpointFBSize = "134217728"
+    vmotion.checkpointSVGAPrimarySize = "268435456"
+    vmotion.svga.mobMaxSize = "1073741824"
+    vmotion.svga.graphicsMemoryKB = "8388608"
+    vmotion.svga.supports3D = "0"
+    vmotion.svga.baseCapsLevel = "0"
+    vmotion.svga.maxPointSize = "0"
+    vmotion.svga.maxTextureSize = "0"
+    vmotion.svga.maxVolumeExtent = "0"
+    vmotion.svga.maxTextureAnisotropy = "0"
+    vmotion.svga.lineStipple = "0"
+    vmotion.svga.dxMaxConstantBuffers = "0"
+    vmotion.svga.dxProvokingVertex = "0"
+    vmotion.svga.sm41 = "0"
+    vmotion.svga.multisample2x = "0"
+    vmotion.svga.multisample4x = "0"
+    vmotion.svga.msFullQuality = "0"
+    vmotion.svga.logicOps = "0"
+    vmotion.svga.bc67 = "0"
+    vmotion.svga.sm5 = "0"
+    vmotion.svga.multisample8x = "0"
+    vmotion.svga.logicBlendOps = "0"
+    ethernet0.generatedAddress = "00:0c:29:c7:63:f5"
+    ethernet0.generatedAddressOffset = "0"
+    vmci0.id = "617047029"
+    monitor.phys_bits_used = "45"
+    cleanShutdown = "TRUE"
+    softPowerOff = "FALSE"
+    usb:1.speed = "2"
+    usb:1.present = "TRUE"
+    usb:1.deviceType = "hub"
+    usb:1.port = "1"
+    usb:1.parent = "-1"
+    usb_xhci:4.present = "TRUE"
+    usb_xhci:4.deviceType = "hid"
+    usb_xhci:4.port = "4"
+    usb_xhci:4.parent = "-1"
+    RemoteDisplay.vnc.enabled = "TRUE"
+
+    """.format(vm_info['name'],vm_info['name'],vm_info['cpus'],vm_info['ram'])
+
+    if drive_attached == True:
+        vmxTemplate = vmxTemplate + "nvme0:0.fileName = " + drive_path + "/" + drive_name
+
+    if optical_attached == True:
+        vmxTemplate = vmxTemplate + '\nsata0:1.present = "TRUE"' + "\nsata0:1.fileName = " + optical_path
+
+    home = os.path.expanduser("~")
+    vmxPath = home + "/vmware/" + vm_info['name'] + "/"
+    os.makedirs(vmxPath)
+
+    vmxFile = open (vmxPath + vm_info['name'] + ".vmx", "w+")
+    vmxFile.write(vmxTemplate)
+    vmxFile.close()
+
 def delVM(VirtualMachine):
+    
+    # depending on hypervisor type, connect and delete from libvirt, or in case of VMWare delete directory
     hypervisor = VirtualMachine.hypervisor
     if hypervisor == 'QEMU':
         conn = libvirt.open("qemu:///system")
+        machine = conn.lookupByName(VirtualMachine.name)
+        machine.undefine()
+        conn.close()
     elif hypervisor == 'Virtualbox':
         conn = libvirt.open("vbox:///session")
-    elif hypervisor == 'VMware':
-        conn = libvirt.open("qemu:///system")
+        machine = conn.lookupByName(VirtualMachine.name)
+        machine.undefine()
+        conn.close()
+    elif hypervisor == 'VMWare':
+        home = os.path.expanduser("~")
+        shutil.rmtree(home + "/vmware/" + VirtualMachine.name)
 
-    machine = conn.lookupByName(VirtualMachine.name)
-    machine.undefine()
-    conn.close()
-
-def startQemuVM(machine_details):
+def startVM(machine_details):
     hypervisor = machine_details.hypervisor
+    # based on hypervisor, run different command to start, as virtualbox does not support libvirt API starting due to bug, and vmware does not either
     if hypervisor == 'QEMU':
         conn = libvirt.open('qemu:///system')
         machine = conn.lookupByName(machine_details.name)
         machine.create()
-    elif hypervisor == 'Virtualbox':
         conn = libvirt.open('vbox:///session')
+    # utilise vbox command line to enable vnc and start vm
+    elif hypervisor == 'Virtualbox':
         os.system("VBoxManage modifyvm " + machine_details.name + " --vrde on")
         os.system("VBoxManage modifyvm " + machine_details.name + " --vrdeproperty VNCPassword=secret")
         os.system("vboxmanage startvm " + machine_details.name + " --type headless")
+    # start vm by pointing to vmx file
     elif hypervisor == 'VMWare':
-        conn = libvirt.open('qemu:///system')
-    conn.close()
+        home = os.path.expanduser("~")
+        os.system("vmrun start " + home + "/vmware/" + machine_details.name + "/" + machine_details.name + ".vmx" + " nogui")
 
 def CreateStorageDrive(disk_info):
     size = str(disk_info['size']) + "G"
-    print(size)
-    os.system("qemu-img create -f qcow2 {}{} {}".format(disk_info['path'],disk_info['name'],size))
+    if disk_info['type'] == "qcow2":
+        os.system("qemu-img create -f qcow2 {}{} {}".format(disk_info['path'],disk_info['name'],size))
+    else:
+        os.system("qemu-img create -f vmdk {}{} {}".format(disk_info['path'],disk_info['name'],size))
 
 def stopVM(machine, action):
+    # gets name and hypervisor from model
     name= machine.name
     hypervisor = machine.hypervisor
 
+    # depending on hypervisor, perform different action/connection.
     if hypervisor == 'QEMU':
         conn = libvirt.open('qemu:///system')
     elif hypervisor == 'Virtualbox':
         conn = libvirt.open('vbox:///session')
-    elif hypervisor == 'VMWare':
-        conn = libvirt.open('qemu:///system')
 
+    # vmware is stopped and restarted manually due to lack of libvirt API support
+    elif hypervisor == 'VMWare':
+        home = os.path.expanduser("~")
+        # depending on action specified by user button perform different vmrun command
+        if (action == "forceoff"):
+            os.system("vmrun stop " + home + "/vmware/" + name + "/" + name + ".vmx" + " hard")
+            return
+        elif (action == "restart"):
+            os.system("vmrun reset " + home + "/vmware/" + name + "/" + name + ".vmx")
+            return
+        elif (action == "shutdown"):
+            os.system("vmrun stop " + home + "/vmware/" + name + "/" + name + ".vmx" + " soft")
+            return
+
+    # looks up vm in API
     machine = conn.lookupByName(name)
     if (action == "forceoff"):
+        # destroys vm (hard shutdown)
         machine.destroy()
         VM.objects.filter(name=name).update(state='OFF')
     elif (action == "shutdown"):
+        # send ACPI shutdown signal, shutdown, restart gui appears in vm
         machine.shutdown()
         VM.objects.filter(name=name).update(state='OFF')
     elif (action == "reset"):
+        # destroys vm and starts it again
         machine.destroy()
         if hypervisor == "Virtualbox":
             os.system("vboxmanage startvm " + name + " --type headless")
@@ -275,37 +465,69 @@ def getHostCPUStats():
     conn.close()
     return cpu_usage
 
-def getGuestCPUStats(name):
-    conn = libvirt.open('qemu:///system')
-    machine = conn.lookupByName(name)
+def getGuestCPUStats(machine):
+    if machine.hypervisor == "QEMU":
+        conn = libvirt.open("qemu:///system")
+    elif machine.hypervisor == 'Virtualbox':
+        conn = libvirt.open("vbox:///session")
+    elif machine.hypervisor == "VMWare":
+        return "No stats available"
+    machine = conn.lookupByName(machine.name)
 
+    # algorithm to calculate cpu usage from cpu_time
+
+    # sample first cpu time
     t1 = time.time()
     c1 = int (machine.info()[4])
     time.sleep(0.01)
+
+    # sample second cpu time (get values from machine info)
     t2 = time.time()
     c2 = int (machine.info()[4])
     c_nums = int (machine.info()[3])
+
+    # calculate the usage difference between the two times
     usage = (c2-c1)*100/((t2-t1)*c_nums*1e9)
     conn.close()
     return usage
 
-def getDiskStats(name):
-    conn = libvirt.open('qemu:///system')
-    machine = conn.lookupByName(name)
-    #diskStats = machine.blockStats("/home/techtino/Disks/MintDisk.qcow2")
-    diskStats = "hello"
+def getDiskStats(machine):
+    
+    # connect to hypervisor and get disk stats based for disk image file
+    if machine.hypervisor == "QEMU":
+        conn = libvirt.open("qemu:///system")
+    elif machine.hypervisor == 'Virtualbox':
+        return "No stats available for hypervisor"
+    elif machine.hypervisor == "VMWare":
+        return "No stats available for hypervisor"
+    machine = conn.lookupByName(machine.name)
+    diskStats = machine.blockStats("/home/techtino/Disks/MintDisk.qcow2")
     conn.close()
     return diskStats
 
-def getMemoryStats(name):
-    conn = libvirt.open('qemu:///system')
-    machine = conn.lookupByName(name)
+def getMemoryStats(machine):
+    
+    # connect based on hypervisor type, if unsupported, return 0 to the user
+    if machine.hypervisor == "QEMU":
+        conn = libvirt.open("qemu:///system")
+    elif machine.hypervisor == 'Virtualbox':
+        conn = libvirt.open("vbox:///session")
+        return 0
+    elif machine.hypervisor == "VMWare":
+        return 0
+
+    # lookup virtual machine in API
+    machine = conn.lookupByName(machine.name)
+
+    # get memory statistics via API
     machine.setMemoryStatsPeriod(5)
     memoryStats = machine.memoryStats()
     conn.close()
     return memoryStats
 
 def getHostMemoryStats():
+    
+    # Use libvirt to get memory stats and return information to listing
     conn = libvirt.open(None)
     mem = conn.getMemoryStats(0)
     conn.close()
@@ -313,27 +535,35 @@ def getHostMemoryStats():
 
 def getVNCPort(machine_details):
 
+    # connect to different URL based on hypervisor from machine model
     if machine_details.hypervisor == "QEMU":
         conn = libvirt.open("qemu:///system")
     elif machine_details.hypervisor == "Virtualbox":
         conn = libvirt.open("vbox:///session")
+
+    # no need to connect to libvirt for vmware as using vmrun
+    elif machine_details.hypervisor == "VMWare":
+        port = "5900"
+        return port
     domain = conn.lookupByName(machine_details.name)
     #get the XML description of the VM
     vmXml = domain.XMLDesc(0)
     root = ET.fromstring(vmXml)
     #get the VNC port
     graphics = root.findall('./devices/graphics')
-    print(graphics)
 
+    # loop over all possible to ensure correct port (correct value is at the end)
     for i in graphics:
         port = i.get('port')
     conn.close()
     return port
 
 def createCustomVM(machine_details):
-    conn = libvirt.open("qemu:///system")
+
+    # checks hypervisor type and connects
+    if machine_details.hypervisor == "QEMU":
+        conn = libvirt.open("qemu:///system")
+    elif machine_details.hypervisor == "Virtualbox":
+        conn = libvirt.open("vbox:///session")
+    # creates VM from XML
     conn.defineXML(machine_details)
-    
-    
-
-
