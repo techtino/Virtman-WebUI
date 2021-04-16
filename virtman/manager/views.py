@@ -64,18 +64,14 @@ def add(request):
 
     # If user is in advanced mode, serve XMLForm (more control, custom XML)
     if request.user.profile.advanced_mode:
-
         # If posting, set XML form and save data if valid, then create custom VM, if incorrect then load page again
         if request.method == "POST":
             form = XMLForm(request.POST)
             if form.is_valid():
                 form.save()
                 vmXML = form.cleaned_data['content']
-                try:
-                    LibvirtManagement.createCustomVM(vmXML)
-                    return redirect('/manager/listing')
-                except:
-                    return render(request, 'advancedadd.html', {'form': form})
+                LibvirtManagement.createCustomVM(vmXML)
+                return redirect('/manager/listing')
         # render form page if GET request
         else:
             form = XMLForm()
@@ -83,7 +79,6 @@ def add(request):
     
     # if user is not in advanced mode, serve standard VM form
     else:
-
         # If posting, save data and run creation function based on hypervisor
         if request.method == "POST":
             form = VMForm(request.POST)

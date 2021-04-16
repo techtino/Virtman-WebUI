@@ -559,11 +559,6 @@ def getVNCPort(machine_details):
     return port
 
 def createCustomVM(machine_details):
-
-    # checks hypervisor type and connects
-    if machine_details.hypervisor == "QEMU":
-        conn = libvirt.open("qemu:///system")
-    elif machine_details.hypervisor == "Virtualbox":
-        conn = libvirt.open("vbox:///session")
+    conn = libvirt.open(None)
     # creates VM from XML
     conn.defineXML(machine_details)
