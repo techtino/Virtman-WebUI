@@ -1,4 +1,4 @@
-from .models import VM, customVM, OpticalDisk
+from .models import VM, customVM, OpticalDisk, StorageDisk
 from django.contrib.auth.models import User
 from django.template import loader
 from django.http import HttpResponse, Http404
@@ -31,13 +31,30 @@ def ISOPage(request):
             'username': username,
             'ISO_list': ISO_list,
         }
-    ISO_list = OpticalDisk.objects.order_by('id')[:40]
     if request.method == "POST":
         IDs = request.POST.getlist('ISOs')
         for id in IDs:
             ISO = OpticalDisk.objects.get(id=id)
             ISO.delete()
     return HttpResponse(template.render(context, request))
+
+def DiskPage(request):
+    template = loader.get_template('Disk.html')
+    Disk_list = StorageDisk.objects.order_by('id')[:40]
+    username = request.user.get_username()
+    context = {
+            'username': username,
+            'Disk_list': Disk_list,
+        }
+    if request.method == "POST":
+        IDs = request.POST.getlist('Disks')
+        for id in IDs:
+            Disk = StorageDisk.objects.get(id=id)
+            LibvirtManagement.delDisk(Disk)
+            Disk.delete()
+
+    return HttpResponse(template.render(context, request))
+
 
 @login_required
 def listing(request):

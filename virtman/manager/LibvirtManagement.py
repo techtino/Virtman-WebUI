@@ -565,3 +565,6 @@ def createCustomVM(machine_details):
     conn = libvirt.open(None)
     # creates VM from XML
     conn.defineXML(machine_details)
+
+def delDisk(Disk):
+    os.remove(Disk.path + Disk.name)
