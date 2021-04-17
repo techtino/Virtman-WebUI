@@ -339,6 +339,7 @@ def createVMWareXML(vm_info):
     usb_xhci:4.port = "4"
     usb_xhci:4.parent = "-1"
     RemoteDisplay.vnc.enabled = "TRUE"
+    RemoteDisplay.vnc.port = "7000"
 
     """.format(vm_info['name'],vm_info['name'],vm_info['cpus'],vm_info['ram'])
 
@@ -543,8 +544,10 @@ def getVNCPort(machine_details):
 
     # no need to connect to libvirt for vmware as using vmrun
     elif machine_details.hypervisor == "VMWare":
-        port = "5900"
+        port = "7000"
         return port
+
+
     domain = conn.lookupByName(machine_details.name)
     #get the XML description of the VM
     vmXml = domain.XMLDesc(0)
@@ -562,6 +565,3 @@ def createCustomVM(machine_details):
     conn = libvirt.open(None)
     # creates VM from XML
     conn.defineXML(machine_details)
-
-def deleteISO(ISO):
-    print(ISO)
