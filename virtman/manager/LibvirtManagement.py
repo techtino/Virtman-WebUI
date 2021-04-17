@@ -562,3 +562,6 @@ def createCustomVM(machine_details):
     conn = libvirt.open(None)
     # creates VM from XML
     conn.defineXML(machine_details)
+
+def deleteISO(ISO):
+    print(ISO)

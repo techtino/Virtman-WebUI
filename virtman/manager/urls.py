@@ -13,6 +13,7 @@ urlpatterns = [
     path('createDisk', views.createDisk, name='createDisk'),
     path('uploadISO', views.uploadISO, name='uploadISO'),
     path('home', views.home, name='home'),
+    path('ISO', views.ISOPage, name='ISO'),
     path('<int:id>/viewStats', views.viewStatsPerVM, name='viewStats'),
     path('<int:id>/startVM', views.startVM_View, name='startVM'),
     path('<int:id>/startCustomVM', views.startcustomVM_View, name='startVM'),
