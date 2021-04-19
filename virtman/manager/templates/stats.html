@@ -4,7 +4,9 @@
 
 <br>Disk read requests: {{disk_stats.0}}, Bytes read {{disk_stats.1}}, Write requests sent {{disk_stats.2}}, Bytes Written {{disk_stats.3}}, Number of errors: {{disk_stats.4}}
 <br>Memory used: {{memory_stats}}
+<br>Network stats: Read bytes: {{network_stats.0}} Read Packets: {{network_stats.1}} Read errors: {{network_stats.2}} Read drops: {{network_stats.3}} Write bytes: {{network_stats.4}} Write packets {{network_stats.5}} Write errors: {{network_stats.6}} Write drops: {{network_stats.7}}
 
+<br><br>
 <meta http-equiv="refresh" content="5">
 This pages automatically refreshes after 5 seconds
 
@@ -18,19 +20,19 @@ let chart = new Chart(ctx, {
     reponsive: true,
     type: "bar",
     data: {
-        labels: ["CPU Usage","Memory Usage","Disk Usage"],
+        labels: ["CPU Usage","Memory Usage"],
         datasets: [
             {
-            label: "CPU Usage",
+            label: "Usage",
             backgroundColor: "#79AEC8",
             borderColor: "#417690",
-            data: [{{cpu_stats}},{{memory_usage}},{{disk_usage}}]
+            data: [{{cpu_stats}},{{memory_usage}}]
         }
     ]
   },
   options: {
      title: {
-        text: "CPU Utilization graph per core",
+        text: "Utilization (%)",
         display: true
      },
      scales: {
@@ -44,7 +46,5 @@ let chart = new Chart(ctx, {
   }
 });
 </script>
-
-
 
 {% endblock content %}

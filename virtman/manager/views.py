@@ -367,10 +367,11 @@ def viewStatsPerVM(request,id):
     # get variety of stats for vm, qemu only functionality for now
     get_object_or_404(VM, id=id)
     machine = VM.objects.get(id=id)
+    
     cpu_stats = LibvirtManagement.getGuestCPUStats(machine)
     disk_stats = LibvirtManagement.getDiskStats(machine)
     memory_stats = LibvirtManagement.getMemoryStats(machine)
-
+    network_stats = LibvirtManagement.getNetworkStats(machine)
     # calculate memory utilisation percentage by difference of ram / total
     try:
         free_mem = float(memory_stats['unused'])
@@ -383,7 +384,8 @@ def viewStatsPerVM(request,id):
         'cpu_stats': cpu_stats,
         'disk_stats': disk_stats,
         'memory_stats': memory_stats,
-        'memory_usage': util_mem
+        'memory_usage': util_mem,
+        'network_stats': network_stats,
     }
     template = loader.get_template('stats.html')
     return HttpResponse(template.render(context, request))
@@ -417,7 +419,6 @@ def viewHostStats(request):
     mem_percent = psutil.virtual_memory()[2]
 
     disk_usage = round(shutil.disk_usage("/")[1] / shutil.disk_usage("/")[0] * 100)
-    print(disk_usage)
     context = {
         'cpu_usage': cpu_usage,
         'mem_usage': mem_percent,
@@ -441,6 +442,7 @@ def vnc_proxy_http(request,id):
     }
     return HttpResponse(template.render(context, request))
 
+@login_required
 def profilePage(request):
     template = loader.get_template('profile.html')
     context = {}

@@ -548,10 +548,29 @@ def getDiskStats(machine):
         return "No stats available for hypervisor"
     elif machine.hypervisor == "VMWare":
         return "No stats available for hypervisor"
-    machine = conn.lookupByName(machine.name)
-    diskStats = machine.blockStats("/home/techtino/Disks/MintDisk.qcow2")
+    
+    path = machine.storage_disk.path
+
+    vm = conn.lookupByName(machine.name)
+    diskStats = vm.blockStats(path + machine.storage_disk.name)
     conn.close()
     return diskStats
+
+def getNetworkStats(machine):
+    # connect to hypervisor and get disk stats based for disk image file
+    if machine.hypervisor == "QEMU":
+        conn = libvirt.open("qemu:///system")
+    elif machine.hypervisor == 'Virtualbox':
+        return "No stats available for hypervisor"
+    elif machine.hypervisor == "VMWare":
+        return "No stats available for hypervisor"
+    vm = conn.lookupByName(machine.name)
+
+    # check xml for interface info and get stats
+    tree = ET.fromstring(vm.XMLDesc())
+    interface = tree.find('devices/interface/target').get('dev')
+    stats = vm.interfaceStats(interface)
+    return stats
 
 def getMemoryStats(machine):
     
