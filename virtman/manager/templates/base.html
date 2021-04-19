@@ -19,15 +19,18 @@
   <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
   <a class="navbar-brand" href="/manager/home">Virtman</a>
   <ul class="navbar-nav mr-auto">
-    <li class="nav-item">
-        <a class="nav-link" href="/manager/listing">VMs</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/manager/ISO">ISOs</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/manager/Disks">Disks</a>
-    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          VMs
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="/manager/listing">Listing</a>
+          <a class="dropdown-item" href="/manager/add">Create VM</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/manager/Disks">Disks</a>
+          <a class="dropdown-item" href="/manager/ISO">ISOs</a>
+        </div>
+      </li>
     <li class="nav-item">
         <a class="nav-link" href="/manager/containers">Containers</a>
     </li>

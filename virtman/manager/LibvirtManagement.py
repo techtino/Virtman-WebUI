@@ -93,7 +93,7 @@ def createQemuXML(vm_info):
         pass
     conn.defineXML(xml)
     conn.close()
-    
+
 def createVirtualboxXML(vm_info):
 
     storage_device = vm_info['storage_disk']
