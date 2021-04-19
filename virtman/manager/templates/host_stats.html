@@ -17,7 +17,7 @@ let chart = new Chart(ctx, {
         labels: ["CPU Usage","Memory Usage","Disk Usage"],
         datasets: [
             {
-            label: "CPU Usage",
+            label: "Usage",
             backgroundColor: "#79AEC8",
             borderColor: "#417690",
             data: [{{cpu_usage}},{{mem_usage}},{{disk_usage}}]
@@ -26,7 +26,7 @@ let chart = new Chart(ctx, {
   },
   options: {
      title: {
-        text: "CPU Utilization graph per core",
+        text: "Utilisation(%)",
         display: true
      },
      scales: {

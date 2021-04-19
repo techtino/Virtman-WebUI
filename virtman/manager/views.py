@@ -1,4 +1,4 @@
-from .models import VM, customVM, OpticalDisk, StorageDisk
+from .models import VM, customVM, OpticalDisk, StorageDisk, container
 from django.contrib.auth.models import User
 from django.template import loader
 from django.http import HttpResponse, Http404
@@ -8,11 +8,13 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.base import TemplateView
 from . import LibvirtManagement
-from .forms import VMForm, storageForm, isoForm, XMLForm
+from .forms import VMForm, storageForm, isoForm, XMLForm, ContainerForm
 from django.http import HttpResponseRedirect
 from django.forms import modelformset_factory
 import os
+import psutil
 import socket
+import shutil
 
 def home(request):
     template = loader.get_template('index.html')
@@ -55,7 +57,6 @@ def DiskPage(request):
 
     return HttpResponse(template.render(context, request))
 
-
 @login_required
 def listing(request):
     # pylint: disable=no-member
@@ -93,6 +94,40 @@ def listing(request):
     return HttpResponse(template.render(context, request))
 
 @login_required
+def containers(request):
+    print("hello")
+    # get list of virtual machines for page to use
+    container_list = container.objects.order_by('id')[:40]
+    # sets template to listing.html
+    template = loader.get_template('Containers.html')
+
+    # provide context to listing page, both standard and advanced vms and IP
+    context = {
+        'container_list': container_list,
+    }
+
+    # If POSTing, get list of VMS delete VM from libvirt/vmware, then delete the object. this is identical for basic and advanced vms
+    if request.method == "POST":
+        IDs = request.POST.getlist('Containers')
+        for id in IDs:
+            LXCContainer = container.objects.get(id=id)
+            LibvirtManagement.delVM(LXCContainer)
+            LXCContainer.delete()
+    return HttpResponse(template.render(context, request))
+
+def addContainer(request):
+    if request.method == "POST":
+        form = ContainerForm(request.POST)
+        if form.is_valid():
+            container_info = form.cleaned_data
+            LibvirtManagement.createLXCXML(container_info)
+            form.save()
+    else:
+        form = ContainerForm()
+        return render(request, 'form.html', {'form': form})
+
+    return redirect('/manager/containers')
+@login_required
 def add(request):
 
     # If user is in advanced mode, serve XMLForm (more control, custom XML)
@@ -101,14 +136,14 @@ def add(request):
         if request.method == "POST":
             form = XMLForm(request.POST)
             if form.is_valid():
-                form.save()
                 vmXML = form.cleaned_data['content']
                 LibvirtManagement.createCustomVM(vmXML)
+                form.save()
                 return redirect('/manager/listing')
         # render form page if GET request
         else:
             form = XMLForm()
-            return render(request, 'advancedadd.html', {'form': form})
+            return render(request, 'form.html', {'form': form})
     
     # if user is not in advanced mode, serve standard VM form
     else:
@@ -116,7 +151,6 @@ def add(request):
         if request.method == "POST":
             form = VMForm(request.POST)
             if form.is_valid():
-                form.save()
                 vm_info = form.cleaned_data
                 if vm_info['hypervisor'] == "QEMU":
                     LibvirtManagement.createQemuXML(vm_info)
@@ -124,12 +158,13 @@ def add(request):
                     LibvirtManagement.createVirtualboxXML(vm_info)
                 elif vm_info['hypervisor'] == "VMWare":
                     LibvirtManagement.createVMWareXML(vm_info)
+                form.save()
                 return redirect('/manager/listing')
         
         # Display form if GETting
         else:
             form = VMForm()
-            return render(request, 'add.html', {'form': form})
+            return render(request, 'form.html', {'form': form})
 
 @login_required
 def createDisk(request):
@@ -139,13 +174,13 @@ def createDisk(request):
         form = storageForm(request.POST)
         if form.is_valid():
            disk_info = form.cleaned_data
-           form.save()
            LibvirtManagement.CreateStorageDrive(disk_info)
+           form.save()
            return redirect('/manager/listing')
     else:
         # render disk creation form
         form = storageForm()
-        return render(request, 'createDisk.html', {'form': form})
+        return render(request, 'form.html', {'form': form})
 
 @login_required
 def uploadISO(request):
@@ -156,11 +191,11 @@ def uploadISO(request):
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/manager/listing')
+    
     else:
-        # if GET request, load form again
         form = isoForm()
-    # render isoUpload form
-    return render(request, 'isoUpload.html', {'form': form})
+        # render isoUpload form
+    return render(request, 'form.html', {'form': form})
 
 @login_required
 def edit(request,id):
@@ -184,7 +219,7 @@ def edit(request,id):
         elif vm_info['hypervisor'] == "VMWare":
             LibvirtManagement.createVMWareXML(vm_info)
         return redirect('/manager/listing')
-    return render(request, 'edit.html', {'form': form})
+    return render(request, 'form.html', {'form': form})
 
 @login_required
 def customEdit(request,id):
@@ -200,7 +235,7 @@ def customEdit(request,id):
         elif vm_info['hypervisor'] == "Virtualbox":
             LibvirtManagement.createVirtualboxXML(vm_info)
         return redirect('/manager/listing')
-    return render(request, 'advanceedit.html', {'form': form})
+    return render(request, 'form.html', {'form': form})
 
 @login_required
 def logout_view(request):
@@ -210,12 +245,21 @@ def logout_view(request):
 @login_required
 def startVM_View(request,id):
     get_object_or_404(VM, id=id)
-    # pylint: disable=no-member
     machine = VM.objects.get(id=id)
+    # pylint: disable=no-member
     LibvirtManagement.startVM(machine)
     VM.objects.filter(id=id).update(state='ON')
     return redirect('/manager/listing')
-    
+
+@login_required
+def startContainer(request,id):
+    get_object_or_404(container, id=id)
+    machine = container.objects.get(id=id)
+    # pylint: disable=no-member
+    LibvirtManagement.startVM(machine)
+    container.objects.filter(id=id).update(state='ON')
+    return redirect('/manager/containers')
+
 @login_required
 def startcustomVM_View(request,id):
     get_object_or_404(customVM, id=id)
@@ -239,6 +283,19 @@ def stopVM_View(request,id):
     # sets state to off in GUI
     VM.objects.filter(id=id).update(state='OFF')
     return redirect('/manager/listing')
+
+@login_required
+def stopContainer(request,id):
+
+    # check if container exists in database, if not 404
+    get_object_or_404(container, id=id)
+    machine = container.objects.get(id=id)
+    action = "forceoff"
+    # runs stopVM function with action specified
+    LibvirtManagement.stopVM(machine, action)
+
+    container.objects.filter(id=id).update(state='OFF')
+    return redirect('/manager/containers')
 
 @login_required
 def AdvancedMode(request):
@@ -356,13 +413,15 @@ def viewStatsPerCustomVM(request,id):
 @login_required
 def viewHostStats(request):
     cpu_usage = LibvirtManagement.getHostCPUStats()
-    mem_usage = LibvirtManagement.getHostMemoryStats()
+    # Get percentage of memory used by host with psutil
+    mem_percent = psutil.virtual_memory()[2]
 
-    mem_percent = mem_usage['free'] / mem_usage['total'] * 100
-
+    disk_usage = round(shutil.disk_usage("/")[1] / shutil.disk_usage("/")[0] * 100)
+    print(disk_usage)
     context = {
         'cpu_usage': cpu_usage,
         'mem_usage': mem_percent,
+        'disk_usage': disk_usage,
     }
     template = loader.get_template('host_stats.html')
     return HttpResponse(template.render(context, request))

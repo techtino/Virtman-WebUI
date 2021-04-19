@@ -357,23 +357,60 @@ def createVMWareXML(vm_info):
     vmxFile.write(vmxTemplate)
     vmxFile.close()
 
+def createLXCXML(container_info):
+    xml = """
+    <domain type="lxc">
+    <name>{}</name>
+    <memory unit="MiB">{}</memory>
+    <vcpu placement="static">{}</vcpu>
+    <os>
+        <type arch="x86_64">exe</type>
+        <init>{}</init>
+    </os>
+    <clock offset="utc"/>
+    <on_poweroff>destroy</on_poweroff>
+    <on_reboot>restart</on_reboot>
+    <on_crash>destroy</on_crash>
+    <devices>
+        <emulator>/usr/lib/libvirt/libvirt_lxc</emulator>
+        <interface type="bridge">
+        <mac address="00:16:3e:bc:af:f7"/>
+        <source bridge="br0"/>
+        </interface>
+        <console type="pty">
+        <target type="lxc" port="0"/>
+        </console>
+    </devices>
+    </domain>
+    """.format(container_info['name'],container_info['ram'],container_info['cpus'],container_info['app'])
+
+    conn = libvirt.open("lxc:///system")
+    conn.defineXML(xml)
+
 def delVM(VirtualMachine):
     
     # depending on hypervisor type, connect and delete from libvirt, or in case of VMWare delete directory
-    hypervisor = VirtualMachine.hypervisor
-    if hypervisor == 'QEMU':
-        conn = libvirt.open("qemu:///system")
+    try:
+        hypervisor = VirtualMachine.hypervisor
+        if hypervisor == 'QEMU':
+            conn = libvirt.open("qemu:///system")
+            machine = conn.lookupByName(VirtualMachine.name)
+            machine.undefine()
+            conn.close()
+        elif hypervisor == 'Virtualbox':
+            conn = libvirt.open("vbox:///session")
+            machine = conn.lookupByName(VirtualMachine.name)
+            machine.undefine()
+            conn.close()
+        elif hypervisor == 'VMWare':
+            home = os.path.expanduser("~")
+            shutil.rmtree(home + "/vmware/" + VirtualMachine.name)
+    # If machine does not have hypervisor info assume its LXC and delete
+    except:
+        conn = libvirt.open("lxc:///system")
         machine = conn.lookupByName(VirtualMachine.name)
         machine.undefine()
         conn.close()
-    elif hypervisor == 'Virtualbox':
-        conn = libvirt.open("vbox:///session")
-        machine = conn.lookupByName(VirtualMachine.name)
-        machine.undefine()
-        conn.close()
-    elif hypervisor == 'VMWare':
-        home = os.path.expanduser("~")
-        shutil.rmtree(home + "/vmware/" + VirtualMachine.name)
 
 def startVM(machine_details):
     hypervisor = machine_details.hypervisor
@@ -382,7 +419,6 @@ def startVM(machine_details):
         conn = libvirt.open('qemu:///system')
         machine = conn.lookupByName(machine_details.name)
         machine.create()
-        conn = libvirt.open('vbox:///session')
     # utilise vbox command line to enable vnc and start vm
     elif hypervisor == 'Virtualbox':
         os.system("VBoxManage modifyvm " + machine_details.name + " --vrde on")
@@ -392,6 +428,11 @@ def startVM(machine_details):
     elif hypervisor == 'VMWare':
         home = os.path.expanduser("~")
         os.system("vmrun start " + home + "/vmware/" + machine_details.name + "/" + machine_details.name + ".vmx" + " nogui")
+    # If hypervisor is not found, assume LXC
+    elif hypervisor == "lxc":
+        conn = libvirt.open("lxc:///system")
+        machine = conn.lookupByName(machine_details.name)
+        machine.create()
 
 def CreateStorageDrive(disk_info):
     size = str(disk_info['size']) + "G"
@@ -424,13 +465,19 @@ def stopVM(machine, action):
         elif (action == "shutdown"):
             os.system("vmrun stop " + home + "/vmware/" + name + "/" + name + ".vmx" + " soft")
             return
+    elif hypervisor == 'lxc':
+        conn = libvirt.open("lxc:///system")
 
     # looks up vm in API
     machine = conn.lookupByName(name)
     if (action == "forceoff"):
         # destroys vm (hard shutdown)
         machine.destroy()
-        VM.objects.filter(name=name).update(state='OFF')
+        # attempt to set vm state (if is lxc container then it wont)
+        try:
+            VM.objects.filter(name=name).update(state='OFF')
+        except:
+            pass
     elif (action == "shutdown"):
         # send ACPI shutdown signal, shutdown, restart gui appears in vm
         machine.shutdown()
