@@ -2,6 +2,7 @@
 {% block content %}
 
 <a class="btn btn-primary" href="/manager/createDisk">Create Disk</a>
+<a class="btn btn-primary" href="/manager/uploadDisk">Import Disk</a>
 
 {% if Disk_list %}
 <table class="table">
@@ -28,7 +29,7 @@
   </tbody>
 </table>
 {% else %}
-There are no ISOs available
+There are no disks available
 {% endif %}
 
 <form method="post" id="delete_form">

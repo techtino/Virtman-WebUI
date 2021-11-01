@@ -12,6 +12,7 @@ urlpatterns = [
     path('profile', views.profilePage, name='profile'),
     path('createDisk', views.createDisk, name='createDisk'),
     path('uploadISO', views.uploadISO, name='uploadISO'),
+    path('uploadDisk', views.uploadDisk, name='uploadDisk'),
     path('home', views.home, name='home'),
     path('ISO', views.ISOPage, name='ISO'),
     path('Disks', views.DiskPage, name='Disks'),

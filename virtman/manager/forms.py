@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm, Textarea
 from django.forms import inlineformset_factory
-from .models import VM, StorageDisk, OpticalDisk, customVM, container
+from .models import VM, StorageDisk, OpticalDisk, customVM, container, UploadedDisk
 
 class VMForm(ModelForm):
     class Meta:
@@ -12,6 +12,13 @@ class storageForm(ModelForm):
     class Meta:
         model = StorageDisk
         fields = "__all__"
+
+class StorageUploadForm(ModelForm):
+    class Meta:
+        model = UploadedDisk
+        fields = "__all__"
+
+
 
 class isoForm(ModelForm):
     class Meta:

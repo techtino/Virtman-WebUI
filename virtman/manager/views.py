@@ -8,7 +8,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.base import TemplateView
 from . import LibvirtManagement
-from .forms import VMForm, storageForm, isoForm, XMLForm, ContainerForm
+from .forms import VMForm, storageForm, StorageUploadForm, isoForm, XMLForm, ContainerForm
 from django.http import HttpResponseRedirect
 from django.forms import modelformset_factory
 import os
@@ -196,6 +196,22 @@ def uploadISO(request):
         form = isoForm()
         # render isoUpload form
     return render(request, 'form.html', {'form': form})
+
+@login_required
+def uploadDisk(request):
+
+    # if POSTing save file and details to disk
+    if request.method == 'POST':
+        form = StorageUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/manager/listing')
+    
+    else:
+        form = StorageUploadForm()
+        # render isoUpload form
+    return render(request, 'form.html', {'form': form})
+
 
 @login_required
 def edit(request,id):
