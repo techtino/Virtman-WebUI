@@ -21,8 +21,11 @@ unix_sock_rw_perms = "0770"
 
 to /etc/libvirt/libvirtd.conf
 
+`sudo virsh net-autostart`
 Then:
 `sudo systemctl restart libvirtd`
+
+
 
 And ensure the user is in the libvirt group.
 
