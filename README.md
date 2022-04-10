@@ -9,6 +9,8 @@ Required Dependencies:
 * VMWare
 * Virtualbox (With VNC Extension Pack setup)
 
++ the following python packages:
+sudo pip3 install libvirt-python django-ckeditor psutil
 Preparing Libvirt:
 
 Add:
