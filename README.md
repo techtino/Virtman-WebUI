@@ -21,13 +21,14 @@ unix_sock_rw_perms = "0770"
 
 to /etc/libvirt/libvirtd.conf
 
-`sudo virsh net-autostart`
+Ensure iptables-nft and dnsmasq are installed (Arch Linux package names)
+
+`sudo virsh net-autostart --network default` 
 Then:
 `sudo systemctl restart libvirtd`
 
-
-
-And ensure the user is in the libvirt group.
+`sudo virsh net-start default` just incase.
+Also ensure the user is in the libvirt group.
 
 Running the Django Server:
 
